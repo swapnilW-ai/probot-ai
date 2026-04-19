@@ -1,0 +1,8 @@
+{
+  "name": "propbot-ai",
+  "version": "1.0.0",
+  "description": "PropBot AI — WhatsApp AI Agent for Real Estate",
+  "dependencies": {
+    "twilio": "^4.19.0"
+  }
+}
