@@ -14,7 +14,6 @@ const SUPABASE_URL     = 'https://zejcequtmrmetogbxudz.supabase.co';
 const SUPABASE_KEY     = 'sb_publishable_MDKa6Y4VCUoVA_UeBdaQ8w_93qDws5E';
 
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
-//const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
 const twilioClient = twilio(TWILIO_SID, TWILIO_AUTH);
 
 // ── AI PROMPTS ────────────────────────────────────────
@@ -161,14 +160,26 @@ async function getHistory(fromNumber) {
 
 // ── GEMINI AI REPLY ───────────────────────────────────
 async function getGeminiReply(history) {
+
+  // v1 API does not support system_instruction
+  // Inject system prompt as first turn instead
+  const contents = [
+    {
+      role: 'user',
+      parts: [{ text: 'Follow these instructions:\n' + AGENT_PROMPT + '\n\nReady?' }]
+    },
+    {
+      role: 'model',
+      parts: [{ text: 'Ready! I will help buyers find properties in Nashik in Hindi and English.' }]
+    },
+    ...history
+  ];
+
   const response = await fetch(GEMINI_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      system_instruction: {
-        parts: [{ text: AGENT_PROMPT }]
-      },
-      contents: history,
+      contents,
       generationConfig: {
         maxOutputTokens: 250,
         temperature: 0.7
@@ -200,10 +211,9 @@ async function saveToSupabase(userMsg, aiReply, fromNumber, profileName) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        contents: [{
-          role: 'user',
-          parts: [{ text: `${EXTRACT_PROMPT}\n\nMessage: ${userMsg}` }]
-        }],
+        contents: [
+          { role: 'user', parts: [{ text: EXTRACT_PROMPT + '\n\nMessage: ' + userMsg }] }
+        ],
         generationConfig: { maxOutputTokens: 100, temperature: 0 }
       })
     });
