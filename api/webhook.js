@@ -9,11 +9,12 @@ const twilio = require('twilio');
 const TWILIO_SID       = 'ACc14b4a5b7ddb0ea49cf2414228edf4f7';
 const TWILIO_AUTH      = 'ff2df03a4765a323ad52b2ba1265d6eb';
 const TWILIO_WA_NUMBER = 'whatsapp:+14155238886';
-const GEMINI_API_KEY   = 'AIzaSyBqdGK5fk9GGQKpcb2uInnWV1CvqUPi5nQ';
+const OPENROUTER_API_KEY = 'process.env.OPENROUTER_API_KEY'
+//const GEMINI_API_KEY   = 'AIzaSyBqdGK5fk9GGQKpcb2uInnWV1CvqUPi5nQ';
 const SUPABASE_URL     = 'https://zejcequtmrmetogbxudz.supabase.co';
 const SUPABASE_KEY     = 'sb_publishable_MDKa6Y4VCUoVA_UeBdaQ8w_93qDws5E';
-
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent?key=${GEMINI_API_KEY}`;
+const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
+//const GEMINI_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent?key=${GEMINI_API_KEY}`;
 //const GEMINI_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
 const twilioClient = twilio(TWILIO_SID, TWILIO_AUTH);
 
@@ -176,7 +177,7 @@ async function getGeminiReply(history) {
     ...history
   ];
 
-  const response = await fetch(GEMINI_URL, {
+  const response = await fetch(OPENROUTER_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
