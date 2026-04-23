@@ -156,4 +156,4 @@ async function saveToSupabase(userMsg, aiReply, fromNumber) {
     })
   });
 }
-"""
+
