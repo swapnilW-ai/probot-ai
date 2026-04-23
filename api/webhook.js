@@ -13,7 +13,8 @@ const GEMINI_API_KEY   = 'AIzaSyBqdGK5fk9GGQKpcb2uInnWV1CvqUPi5nQ';
 const SUPABASE_URL     = 'https://zejcequtmrmetogbxudz.supabase.co';
 const SUPABASE_KEY     = 'sb_publishable_MDKa6Y4VCUoVA_UeBdaQ8w_93qDws5E';
 
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent?key=${GEMINI_API_KEY}`;
+//const GEMINI_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
 const twilioClient = twilio(TWILIO_SID, TWILIO_AUTH);
 
 // ── AI PROMPTS ────────────────────────────────────────
