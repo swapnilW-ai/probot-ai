@@ -94,7 +94,7 @@ async function getAIReply(history) {
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
-      model: "mistralai/mistral-7b-instruct:free",
+      model: "openchat/openchat-3.5-0106:free",
       messages: [
         { role: "system", content: AGENT_PROMPT },
         ...history.map(h => ({
