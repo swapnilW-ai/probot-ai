@@ -19,7 +19,7 @@ const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 const twilioClient = twilio(TWILIO_SID, TWILIO_AUTH);
 
 // ── AI PROMPT ─────────────────────────────────────────
-const AGENT_PROMPT = 'You are an expert AI real estate assistant for Nashik.
+const AGENT_PROMPT = "You are an expert AI real estate assistant for Nashik.
 
 - Speak in Hinglish (Hindi + English)
 - Keep replies short (3-4 lines)
@@ -33,7 +33,7 @@ Listings:
 3BHK College Road ₹95L
 
 Goal:
-Understand user → suggest property → push for site visit.';
+Understand user → suggest property → push for site visit.";
 
 // ── MAIN HANDLER ──────────────────────────────────────
 export default async function handler(req, res) {
