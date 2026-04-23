@@ -34,7 +34,6 @@ Listings:
 
 Goal:
 Understand user → suggest property → push for site visit.`;
-
 // ── MAIN HANDLER ──────────────────────────────────────
 export default async function handler(req, res) {
 
