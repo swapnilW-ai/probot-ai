@@ -94,7 +94,7 @@ async function getAIReply(history) {
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
-      model: "meta-llama/llama-3-8b-instruct:free",
+      model: "nousresearch/nous-capybara-7b:free",
       messages: [
         { role: "system", content: AGENT_PROMPT },
         ...history.map(h => ({
