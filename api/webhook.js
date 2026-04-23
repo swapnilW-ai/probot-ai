@@ -1,5 +1,4 @@
-// ═══════════════════════════════════════════════════════
-const twilio = require('twilio');
+
 // ═══════════════════════════════════════════════════════
 // PROPBOT AI — FINAL (OpenRouter + Twilio + Supabase)
 // No Gemini, No quota issues, Production-ready
