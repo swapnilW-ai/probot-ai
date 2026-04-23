@@ -47,7 +47,7 @@ module.exports = async function handler(req, res) {
   const incomingMsg = req.body.Body || '';
   const fromNumber  = req.body.From || '';
 
-  console.log("📩", incomingMsg);
+  console.log("OPENROUTER:", process.env.OPENROUTER_API_KEY);
 
   try {
     const history = await getHistory(fromNumber);
@@ -90,7 +90,7 @@ async function getAIReply(history) {
   const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
     method: "POST",
     headers: {
-      "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+      "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
@@ -123,7 +123,7 @@ async function getHistory(fromNumber) {
     const phone = fromNumber.replace('whatsapp:', '');
 
     const res = await fetch(
-      "${SUPABASE_URL}/rest/v1/conversations?phone=eq.${phone}&limit=5",
+      `${SUPABASE_URL}/rest/v1/conversations?phone=eq.${phone}&limit=5`,
       { headers: { apikey: SUPABASE_KEY } }
     );
 
@@ -143,7 +143,7 @@ async function getHistory(fromNumber) {
 async function saveToSupabase(userMsg, aiReply, fromNumber) {
   const phone = fromNumber.replace('whatsapp:', '');
 
-  await fetch("${SUPABASE_URL}/rest/v1/conversations", {
+  await fetch(`${SUPABASE_URL}/rest/v1/conversations`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
