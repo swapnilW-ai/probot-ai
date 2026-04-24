@@ -94,19 +94,42 @@ async function getAgentId(toNumber) {
 // 🔹 GET PROPERTIES FOR THAT AGENT
 // ─────────────────────────────────────────────
 async function getAgentProperties(agentId) {
-  const res = await fetch(
-    `${SUPABASE_URL}/rest/v1/properties?agent_id=eq.${agentId}`,
-    {
-      headers: {
-        apikey: SUPABASE_KEY,
-        Authorization: `Bearer ${SUPABASE_KEY}`
-      }
+
+  console.log("🔎 Agent ID:", agentId);
+
+  // ❌ If agent not found
+  if (!agentId) {
+    console.error("❌ agentId is undefined");
+    return "No properties available";
+  }
+
+  const url = `${SUPABASE_URL}/rest/v1/properties?agent_id=eq.${agentId}`;
+  console.log("🌐 Fetching:", url);
+
+  const res = await fetch(url, {
+    headers: {
+      apikey: SUPABASE_KEY,
+      Authorization: `Bearer ${SUPABASE_KEY}`
     }
-  );
+  });
 
   const data = await res.json();
 
-  // format nicely for AI
+  console.log("📦 SUPABASE RESPONSE:", data);
+
+  // ❌ If not array (THIS is your crash)
+  if (!Array.isArray(data)) {
+    console.error("❌ Not array:", data);
+    return "No properties available";
+  }
+
+  // ❌ No properties
+  if (data.length === 0) {
+    console.warn("⚠️ No properties found");
+    return "No properties available";
+  }
+
+  // ✅ Format for AI
   return data.map(p =>
     `- ${p.bhk}BHK in ${p.location} for ₹${p.price}L (${p.details})`
   ).join("\n");
