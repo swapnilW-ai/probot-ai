@@ -1,93 +1,150 @@
-
 // ═══════════════════════════════════════════════════════
 // PROPBOT AI — FINAL (OpenRouter + Twilio + Supabase)
 // No Gemini, No quota issues, Production-ready
 // ═══════════════════════════════════════════════════════
+const twilio = require("twilio");
 
-const twilio = require('twilio');
+// ENV VARIABLES
+const {
+  TWILIO_SID,
+  TWILIO_AUTH,
+  TWILIO_WA_NUMBER,
+  OPENROUTER_API_KEY,
+  SUPABASE_URL,
+  SUPABASE_KEY
+} = process.env;
 
-// ── ENV VARIABLES (SET IN VERCEL) ─────────────────────
-const TWILIO_SID       = process.env.TWILIO_SID;
-const TWILIO_AUTH      = process.env.TWILIO_AUTH;
-const TWILIO_WA_NUMBER = process.env.TWILIO_WA_NUMBER;
+const client = twilio(TWILIO_SID, TWILIO_AUTH);
 
-const SUPABASE_URL     = process.env.SUPABASE_URL;
-const SUPABASE_KEY     = process.env.SUPABASE_KEY;
-
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
-
-const twilioClient = twilio(TWILIO_SID, TWILIO_AUTH);
-
-// ── AI PROMPT ─────────────────────────────────────────
-const AGENT_PROMPT = `You are an expert AI real estate assistant for Nashik.
-
-- Speak in Hinglish (Hindi + English)
-- Keep replies short (3-4 lines)
-- Be friendly, not robotic
-
-Listings:
-1BHK Panchavati ₹24L
-2BHK Gangapur ₹48.5L
-2BHK Ambad ₹40L
-3BHK Satpur ₹75L
-3BHK College Road ₹95L
-
-Goal:
-Understand user → suggest property → push for site visit.`;
-// ── MAIN HANDLER ──────────────────────────────────────
+// MAIN HANDLER
 module.exports = async function handler(req, res) {
-  if (req.method === 'GET') {
-    return res.status(200).json({ status: '✅ Live' });
+
+  if (req.method === "GET") {
+    return res.status(200).send("Webhook live");
   }
 
-  if (req.method !== 'POST') {
-    return res.status(405).send('Method not allowed');
-  }
-
-  const incomingMsg = req.body.Body || '';
-  const fromNumber  = req.body.From || '';
+  const incomingMsg = req.body.Body || "";
+  const fromNumber  = req.body.From || "";
+  const toNumber    = req.body.To || "";
 
   console.log("OPENROUTER:", process.env.OPENROUTER_API_KEY);
 
   try {
-    const history = await getHistory(fromNumber);
 
-    history.push({
-      role: 'user',
-      parts: [{ text: incomingMsg }]
-    });
+    // 1. GET AGENT ID (based on Twilio number)
+    const agentId = await getAgentId(toNumber);
 
-    const aiReply = await getAIReply(history);
+    // 2. GET AGENT PROPERTIES
+    const properties = await getAgentProperties(agentId);
 
-    await twilioClient.messages.create({
-      body: aiReply || "Thoda issue hai, try again 🙏",
+    // 3. CREATE AI PROMPT
+    const prompt = buildPrompt(incomingMsg, properties);
+
+    // 4. CALL OPENROUTER
+    const aiReply = await getAIReply(prompt);
+
+    // 5. SEND WHATSAPP MESSAGE
+    await client.messages.create({
+      body: aiReply,
       from: TWILIO_WA_NUMBER,
       to: fromNumber
     });
 
-    saveToSupabase(incomingMsg, aiReply, fromNumber)
-      .catch(e => console.error("Supabase error:", e));
+    // 6. SAVE LEAD + CHAT
+    await saveConversation(agentId, fromNumber, incomingMsg, aiReply);
 
-    res.setHeader('Content-Type', 'text/xml');
-    return res.status(200).send('<Response></Response>');
+    return res.status(200).send("<Response></Response>");
 
   } catch (err) {
-    console.error("❌ ERROR:", err);
+    console.error("❌ ERROR:", err.message);
 
-    await twilioClient.messages.create({
-      body: "Server busy, try again 🙏",
+    await client.messages.create({
+      body: "Thoda issue aa raha hai, please try again 🙏",
       from: TWILIO_WA_NUMBER,
       to: fromNumber
     });
 
-    return res.status(200).send('<Response></Response>');
+    return res.status(200).send("<Response></Response>");
   }
+};
+
+
+
+// ─────────────────────────────────────────────
+// 🔹 GET AGENT ID FROM TWILIO NUMBER
+// ─────────────────────────────────────────────
+async function getAgentId(toNumber) {
+  const res = await fetch(
+    `${SUPABASE_URL}/rest/v1/agents?whatsapp_number=eq.${encodeURIComponent(toNumber)}&select=id`,
+    {
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`
+      }
+    }
+  );
+
+  const data = await res.json();
+  return data?.[0]?.id;
 }
 
-// ── AI FUNCTION (OpenRouter) ──────────────────────────
-async function getAIReply(history) {
 
-  const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+
+// ─────────────────────────────────────────────
+// 🔹 GET PROPERTIES FOR THAT AGENT
+// ─────────────────────────────────────────────
+async function getAgentProperties(agentId) {
+  const res = await fetch(
+    `${SUPABASE_URL}/rest/v1/properties?agent_id=eq.${agentId}`,
+    {
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`
+      }
+    }
+  );
+
+  const data = await res.json();
+
+  // format nicely for AI
+  return data.map(p =>
+    `- ${p.bhk}BHK in ${p.location} for ₹${p.price}L (${p.details})`
+  ).join("\n");
+}
+
+
+
+// ─────────────────────────────────────────────
+// 🔹 BUILD AI PROMPT
+// ─────────────────────────────────────────────
+function buildPrompt(userMsg, properties) {
+  return `
+You are a real estate assistant.
+
+User message:
+${userMsg}
+
+Available properties:
+${properties}
+
+Rules:
+- Reply in Hinglish
+- Keep it short (3-4 lines)
+- Suggest best matching property
+- Ask for site visit
+
+Reply:
+`;
+}
+
+
+
+// ─────────────────────────────────────────────
+// 🔹 OPENROUTER CALL
+// ─────────────────────────────────────────────
+async function getAIReply(prompt) {
+
+  const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
     method: "POST",
     headers: {
       "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
@@ -96,64 +153,39 @@ async function getAIReply(history) {
     body: JSON.stringify({
       model: "meta-llama/llama-3.3-70b-instruct",
       messages: [
-        { role: "system", content: AGENT_PROMPT },
-        ...history.map(h => ({
-          role: h.role === 'model' ? 'assistant' : 'user',
-          content: h.parts[0].text
-        }))
-      ],
-      temperature: 0.7,
-      max_tokens: 200
+        { role: "user", content: prompt }
+      ]
     })
   });
 
-  const data = await response.json();
+  const data = await res.json();
 
-  if (!data.choices) {
+  if (data.error) {
     console.error("AI ERROR:", data);
-    return "Thoda issue aa raha hai, please try again 🙏";
+    throw new Error(data.error.message);
   }
 
   return data.choices[0].message.content;
 }
 
-// ── GET HISTORY ───────────────────────────────────────
-async function getHistory(fromNumber) {
-  try {
-    const phone = fromNumber.replace('whatsapp:', '');
 
-    const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/conversations?phone=eq.${phone}&limit=5`,
-      { headers: { apikey: SUPABASE_KEY } }
-    );
 
-    const data = await res.json();
-
-    return (data || []).map(c => ({
-      role: c.role === 'user' ? 'user' : 'model',
-      parts: [{ text: c.message }]
-    }));
-
-  } catch {
-    return [];
-  }
-}
-
-// ── SAVE DATA ─────────────────────────────────────────
-async function saveToSupabase(userMsg, aiReply, fromNumber) {
-  const phone = fromNumber.replace('whatsapp:', '');
+// ─────────────────────────────────────────────
+// 🔹 SAVE CONVERSATION
+// ─────────────────────────────────────────────
+async function saveConversation(agentId, phone, userMsg, aiReply) {
 
   await fetch(`${SUPABASE_URL}/rest/v1/conversations`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      apikey: SUPABASE_KEY
+      apikey: SUPABASE_KEY,
+      Authorization: `Bearer ${SUPABASE_KEY}`
     },
-    body: JSON.stringify({
-      phone,
-      user_msg: userMsg,
-      ai_msg: aiReply
-    })
+    body: JSON.stringify([
+      { agent_id: agentId, phone, role: "user", message: userMsg },
+      { agent_id: agentId, phone, role: "assistant", message: aiReply }
+    ])
   });
-}
 
+}
