@@ -1,27 +1,15 @@
-<!-- ONLY SHOWING IMPORTANT FIXED PARTS — your UI stays same -->
-
-<script>
-// ── SUPABASE ──
-const { createClient } = supabase;
-const db = createClient(
-  'https://zejcequtmrmetogbxudz.supabase.co',
-  'sb_publishable_MDKa6Y4VCUoVA_UeBdaQ8w_93qDws5E'
-);
-
-let currentUser = null;
-
-// ── INIT (FIXED) ──
+// ── INIT ──
 (async () => {
   const { data: { session } } = await db.auth.getSession();
 
-  if (!session) {
-    window.location.href = "/agent-portal.html"; // ✅ correct redirect
+  if (!session?.user) {
+    window.location.href = "/portal";
     return;
   }
 
   currentUser = session.user;
 
-  // ✅ Load agent profile
+  // Load agent profile
   const { data: profile } = await db
     .from('agents')
     .select('*')
@@ -31,129 +19,21 @@ let currentUser = null;
   if (profile) {
     const initials = profile.name?.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
 
-    document.querySelector('.agent-avatar').textContent = initials || '?';
-    document.querySelector('.agent-name').textContent = profile.name;
-    document.querySelector('.agent-plan').textContent =
+    document.getElementById('agent-avatar').textContent = initials || '?';
+    document.getElementById('agent-name').textContent = profile.name;
+    document.getElementById('agent-plan').textContent =
       `${profile.plan?.toUpperCase()} · ${profile.city}`;
   }
 
   document.getElementById('topbar-date').textContent =
-    new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'short',year:'numeric'});
+    new Date().toLocaleDateString('en-IN',{
+      weekday:'long',
+      day:'numeric',
+      month:'short',
+      year:'numeric'
+    });
 
   await connectDB();
   await loadLeads();
   await loadStats();
 })();
-
-
-// ── LOGOUT (NEW) ──
-async function logout() {
-  await db.auth.signOut();
-  window.location.href = "/"; // landing page
-}
-
-
-// ── DB CONNECTION ──
-async function connectDB() {
-  try {
-    const { error } = await db.from('leads').select('id').limit(1);
-    if (error) throw error;
-    setPill('blue', '✓ Supabase Connected');
-  } catch(e) {
-    setPill('red', '✗ DB Error');
-  }
-}
-
-
-// ── LOAD LEADS (FIXED: AGENT FILTER) ──
-async function loadLeads() {
-  try {
-    const { data } = await db
-      .from('leads')
-      .select('*')
-      .eq('agent_id', currentUser.id) // ✅ CRITICAL FIX
-      .order('created_at', { ascending: false })
-      .limit(25);
-
-    const tb = document.getElementById('leads-tbody');
-
-    if (!data?.length) {
-      tb.innerHTML = `<tr><td colspan="6"><div class="empty">No leads yet</div></td></tr>`;
-      return;
-    }
-
-    tb.innerHTML = data.map(l => `
-      <tr>
-        <td>${l.name || 'Unknown'}</td>
-        <td>${l.bhk || '?'} · ${l.location || ''}</td>
-        <td>₹${l.budget_max || '?'}</td>
-        <td>${l.score || 'warm'}</td>
-        <td>${ago(l.created_at)}</td>
-        <td><button class="abtn">Action</button></td>
-      </tr>
-    `).join('');
-
-  } catch(e) {
-    console.error(e);
-  }
-}
-
-
-// ── LOAD STATS (FIXED: AGENT FILTER) ──
-async function loadStats() {
-  const { data } = await db
-    .from('leads')
-    .select('*')
-    .eq('agent_id', currentUser.id); // ✅ FIX
-
-  if (!data) return;
-
-  const today = new Date().toDateString();
-
-  document.getElementById('s-total').textContent = data.length;
-  document.getElementById('s-hot').textContent =
-    data.filter(l => l.score === 'hot').length;
-
-  document.getElementById('s-today').textContent =
-    data.filter(l => new Date(l.created_at).toDateString() === today).length;
-}
-
-
-// ── SAVE LEAD (FIXED: agent_id added) ──
-async function saveLead(info, rawMsg) {
-  try {
-    await db.from('leads').insert([{
-      agent_id: currentUser.id, // ✅ CRITICAL
-      name: info.name || 'Buyer',
-      bhk: info.bhk,
-      budget_min: info.budget_min,
-      budget_max: info.budget_max,
-      location: info.location || '',
-      score: info.score || 'warm',
-      status: 'new'
-    }]);
-
-    await loadLeads();
-    await loadStats();
-
-  } catch(e) {
-    console.error(e);
-  }
-}
-
-
-// ── HELPERS ──
-function ago(ts) {
-  const m = Math.floor((Date.now() - new Date(ts)) / 60000);
-  if (m < 60) return m + 'm ago';
-  const h = Math.floor(m / 60);
-  if (h < 24) return h + 'h ago';
-  return Math.floor(h / 24) + 'd ago';
-}
-
-function setPill(cls, txt) {
-  const p = document.getElementById('db-pill');
-  p.className = `pill ${cls}`;
-  p.innerHTML = `<span>${txt}</span>`;
-}
-</script>
