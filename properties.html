@@ -474,7 +474,7 @@ async function saveProperty() {
   btn.innerHTML = '<div class="spin"></div> Saving...';
 
   const { data: { user } } = await db.auth.getUser();
-  const agentId = user.id; // ✅ FIXED
+  const agentId = user.id;
 
   console.log("Saving agentId:", agentId);
 
@@ -494,13 +494,29 @@ async function saveProperty() {
   };
 
   try {
-    const { error } = await db.from('properties').insert([payload]);
-    if (error) throw error;
+    if (editingId) {
+      // UPDATE
+      const { error } = await db
+        .from('properties')
+        .update(payload)
+        .eq('id', editingId);
 
-    showMsg('✅ Property added!', 'success');
+      if (error) throw error;
+
+      showMsg('✅ Property updated!', 'success');
+
+    } else {
+      // INSERT
+      const { error } = await db
+        .from('properties')
+        .insert([payload]);
+
+      if (error) throw error;
+
+      showMsg('✅ Property added!', 'success');
+    }
 
     await loadProperties();
-
     setTimeout(closeModal, 1200);
 
   } catch (e) {
@@ -509,33 +525,7 @@ async function saveProperty() {
 
   btn.disabled = false;
   btn.textContent = 'Save Property';
-}  
-
-
-  try {
-    if (editingId) {
-      // Update existing
-      const { error } = await db.from('properties').update(payload).eq('id', editingId);
-      if (error) throw error;
-      showMsg('✅ Property updated!', 'success');
-    } else {
-      // Insert new
-      const { error } = await db.from('properties').insert([payload]);
-      if (error) throw error;
-      showMsg('✅ Property added! AI will use this now.', 'success');
-    }
-
-    await loadProperties();
-    setTimeout(closeModal, 1200);
-
-  } catch(e) {
-    showMsg(e.message, 'error');
-  }
-
-  btn.disabled = false;
-  btn.textContent = 'Save Property';
 }
-
 // ── EDIT ──
 function editProperty(id) { openModal(id); }
 
