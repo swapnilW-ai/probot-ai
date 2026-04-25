@@ -336,8 +336,8 @@ async function loadProperties() {
     console.log("RAW DATA:", data); // 🔥 important debug
     console.log("IS ARRAY:", Array.isArray(data));
 
-    properties = data || [];
-
+    //properties = data || [];
+    properties = Array.isArray(data) ? data : [];
     console.log('Properties loaded:', properties.length);
 
     renderProperties();
