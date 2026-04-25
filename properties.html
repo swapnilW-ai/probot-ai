@@ -328,12 +328,13 @@ async function loadProperties() {
     const { data, error } = await db
       .from('properties')
       .select('*')
-      //.eq('agent_id', agentId)
+      .eq('agent_id', agentId)
       .order('created_at', { ascending: false });
 
     if (error) throw error;
 
     console.log("RAW DATA:", data); // 🔥 important debug
+    console.log("IS ARRAY:", Array.isArray(data));
 
     properties = data || [];
 
