@@ -317,10 +317,14 @@ let properties = [];
 // ── LOAD PROPERTIES ──
 async function loadProperties() {
   if (!currentAgent) return;
+
   try {
     const { data: { user } } = await db.auth.getUser();
-    const agentId = user?.id || currentAgent.id;
-    console.log('Loading properties for agent:', agentId);
+
+    const agentId = user.id; // ✅ always use this
+
+    console.log("Fetching agentId:", agentId); // ✅ correct place
+
     const { data, error } = await db
       .from('properties')
       .select('*')
@@ -328,10 +332,16 @@ async function loadProperties() {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
+
+    console.log("RAW DATA:", data); // 🔥 important debug
+
     properties = data || [];
-    console.log('Properties loaded:', properties.length, properties);
+
+    console.log('Properties loaded:', properties.length);
+
     renderProperties();
     updateStats();
+
   } catch(e) {
     console.error('Load error:', e.message);
   }
@@ -463,14 +473,43 @@ async function saveProperty() {
   btn.innerHTML = '<div class="spin"></div> Saving...';
 
   const { data: { user } } = await db.auth.getUser();
-  const agentId = user?.id || currentAgent.id;
-  console.log('Saving property for agent:', agentId);
+  const agentId = user.id; // ✅ FIXED
+
+  console.log("Saving agentId:", agentId);
 
   const payload = {
     agent_id: agentId,
-    bhk, price, area, location, city, floor,
-    status, amenities, description, facing, possession
+    bhk,
+    price,
+    area,
+    location,
+    city,
+    floor,
+    status,
+    amenities,
+    description,
+    facing,
+    possession
   };
+
+  try {
+    const { error } = await db.from('properties').insert([payload]);
+    if (error) throw error;
+
+    showMsg('✅ Property added!', 'success');
+
+    await loadProperties();
+
+    setTimeout(closeModal, 1200);
+
+  } catch (e) {
+    showMsg(e.message, 'error');
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Save Property';
+}  
+
 
   try {
     if (editingId) {
