@@ -318,18 +318,22 @@ let properties = [];
 async function loadProperties() {
   if (!currentAgent) return;
   try {
+    const { data: { user } } = await db.auth.getUser();
+    const agentId = user?.id || currentAgent.id;
+    console.log('Loading properties for agent:', agentId);
     const { data, error } = await db
       .from('properties')
       .select('*')
-      .eq('agent_id', currentAgent.id)
+      .eq('agent_id', agentId)
       .order('created_at', { ascending: false });
 
     if (error) throw error;
     properties = data || [];
+    console.log('Properties loaded:', properties.length, properties);
     renderProperties();
     updateStats();
   } catch(e) {
-    console.error('Load error:', e);
+    console.error('Load error:', e.message);
   }
 }
 
@@ -378,7 +382,8 @@ function renderProperties() {
 function updateStats() {
   const available = properties.filter(p=>p.status==='available'||!p.status).length;
   const sold = properties.filter(p=>p.status==='sold').length;
-  const totalValue = properties.reduce((sum,p)=>sum+(p.price||0),0);
+  const totalValue = properties.reduce((sum,p)=>sum+(parseFloat(p.price)||0),0);
+  console.log('Stats:', {total: properties.length, available, sold, totalValue});
   document.getElementById('ps-total').textContent = properties.length;
   document.getElementById('ps-available').textContent = available;
   document.getElementById('ps-sold').textContent = sold;
@@ -457,8 +462,12 @@ async function saveProperty() {
   btn.disabled = true;
   btn.innerHTML = '<div class="spin"></div> Saving...';
 
+  const { data: { user } } = await db.auth.getUser();
+  const agentId = user?.id || currentAgent.id;
+  console.log('Saving property for agent:', agentId);
+
   const payload = {
-    agent_id: currentAgent.id,
+    agent_id: agentId,
     bhk, price, area, location, city, floor,
     status, amenities, description, facing, possession
   };
