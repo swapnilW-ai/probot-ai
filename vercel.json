@@ -11,17 +11,14 @@
     }
   ],
   "routes": [
-    {
-      "src": "/api/webhook",
-      "dest": "/api/webhook.js"
-    },
-    {
-      "src": "/(.*\\.html)",
-      "dest": "/$1"
-    },
-    {
-      "src": "/",
-      "dest": "/index.html"
-    }
+    { "src": "/api/webhook", "dest": "/api/webhook.js" },
+
+    { "src": "/", "dest": "/index.html" },
+
+    { "src": "/dashboard", "dest": "/agent-dashboard.html" },
+    { "src": "/portal", "dest": "/agent-portal.html" },
+    { "src": "/properties", "dest": "/properties.html" },
+
+    { "src": "/(.*\\.html)", "dest": "/$1" }
   ]
 }
