@@ -295,7 +295,7 @@ let properties = [];
 // ── INIT ──
 (async () => {
   const { data: { session } } = await db.auth.getSession();
-  if (!session) { location.href = 'agent-portal.html'; return; }
+  if (!session) { location.href = '/portal'; return; }
 
   currentAgent = session.user;
 
