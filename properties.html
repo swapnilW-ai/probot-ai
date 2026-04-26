@@ -404,11 +404,13 @@ function updateStats() {
   const available = properties.filter(p=>p.status==='available'||!p.status).length;
   const sold = properties.filter(p=>p.status==='sold').length;
   const totalValue = properties.reduce((sum,p)=>sum+(parseFloat(p.price)||0),0);
+  // Fix floating issue
+  const cleanTotal = parseFloat(totalValue.toFixed(2));
   console.log('Stats:', {total: properties.length, available, sold, totalValue});
   document.getElementById('ps-total').textContent = properties.length;
   document.getElementById('ps-available').textContent = available;
   document.getElementById('ps-sold').textContent = sold;
-  document.getElementById('ps-value').textContent = `₹${totalValue}L`;
+  document.getElementById('ps-value').textContent = formatPrice(cleanTotal);
 }
 
 // ── OPEN MODAL ──
@@ -590,7 +592,7 @@ function normalizePrice(value) {
   if (!price) return "₹0";
 
   if (price >= 100) {
-    let cr = (price / 100).toFixed(2).replace(/\.00$/, '');
+    let cr = (price / 100).toFixed(1); 
     return `₹${cr} Cr`;
   }
 
