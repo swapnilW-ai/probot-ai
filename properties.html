@@ -221,9 +221,24 @@
           <label>Price </label>
           <input type="text" id="f-price" placeholder="48 (L) or 1.2 (Cr)">
         </div>
-        <div class="fg">
-          <label id="area-label">Area (sqft)</label>
-          <input type="number" id="f-area" placeholder="950">
+        <!-- PLOT AREA -->
+        <div class="fg" id="plot-area-box">
+          <label>Area (acres)</label>
+          <input type="number" id="f-area" placeholder="1.5">
+        </div>
+
+        <!-- FLAT/VILLA AREA -->
+        <div id="built-area-box" style="display:none;">
+          <div class="fg-row">
+            <div class="fg">
+              <label>Carpet Area (sqft)</label>
+              <input type="number" id="f-carpet" placeholder="750">
+            </div>
+            <div class="fg">
+              <label>Super Built-up (sqft)</label>
+              <input type="number" id="f-super" placeholder="1050">
+            </div>
+          </div>
         </div>
       </div>
 
@@ -469,7 +484,16 @@ async function saveProperty() {
   const bhk        = document.getElementById('f-bhk').value;
   const rawPrice = document.getElementById('f-price').value;
   const price = normalizePrice(rawPrice);
-  const area       = parseInt(document.getElementById('f-area').value) || null;
+  const type = document.getElementById('f-type').value;
+  let area = null;
+  let carpet_area = null;
+  let super_area = null;
+  if (type === "plot") {
+    area = parseFloat(document.getElementById('f-area').value) || null;
+  } else {
+    carpet_area = parseInt(document.getElementById('f-carpet').value) || null;
+    super_area = parseInt(document.getElementById('f-super').value) || null;
+  }
   const location   = document.getElementById('f-location').value.trim();
   const city       = document.getElementById('f-city').value.trim();
   const floor      = document.getElementById('f-floor').value.trim();
@@ -498,6 +522,8 @@ async function saveProperty() {
     bhk,
     price,
     area,
+    carpet_area,    
+    super_area,     
     location,
     city,
     floor,
@@ -603,18 +629,27 @@ function normalizePrice(value) {
   el.textContent = msg;
   el.className = `msg-bar ${type}`;
 }
-function handleTypeChange() {
+  function handleTypeChange() {
   const type = document.getElementById("f-type").value;
   const bhk = document.getElementById("f-bhk");
-  const areaLabel = document.getElementById("area-label");
+
+  const plotBox = document.getElementById("plot-area-box");
+  const builtBox = document.getElementById("built-area-box");
 
   if (type === "plot") {
+    // Plot mode
     bhk.value = "";
     bhk.disabled = true;
-    areaLabel.innerText = "Area (acres)";
-  } else {
+
+    plotBox.style.display = "block";
+    builtBox.style.display = "none";
+
+  } else if (type === "flat" || type === "villa") {
+    // Built property mode
     bhk.disabled = false;
-    areaLabel.innerText = "Area (sqft)";
+
+    plotBox.style.display = "none";
+    builtBox.style.display = "block";
   }
 }
 document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal(); });
