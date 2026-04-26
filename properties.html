@@ -561,6 +561,8 @@ function statusLabel(s) {
   return s==='sold'?'Sold':s==='hold'?'On Hold':'Available';
 }
 function normalizePrice(value) {
+  if (!value) return null;
+
   let v = value.toString().toLowerCase().trim();
 
   // If user types "1.2cr"
@@ -575,16 +577,16 @@ function normalizePrice(value) {
 
   let num = parseFloat(v);
 
-  // Smart guess:
-  // If value is small (<=10), assume crore
+  if (isNaN(num)) return null; // ✅ FIX
+
+  // Smart guess
   if (num <= 10) {
-    return num * 100; // convert Cr → L
+    return num * 100;
   }
 
-  // Else assume already in Lakhs
   return num;
 }
-function showMsg(msg, type) {
+  function showMsg(msg, type) {
   const el = document.getElementById('modal-msg');
   el.textContent = msg;
   el.className = `msg-bar ${type}`;
