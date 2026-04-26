@@ -488,8 +488,7 @@ function clearForm() {
 
 // ── SAVE PROPERTY ──
 async function saveProperty() {
-  const type       = document.getElementById('f-type').value; 
-  const bhk        = document.getElementById('f-bhk').value;
+    const bhk        = document.getElementById('f-bhk').value;
   const rawPrice = document.getElementById('f-price').value;
   const price = normalizePrice(rawPrice);
   const type = document.getElementById('f-type').value;
