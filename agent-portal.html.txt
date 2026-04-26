@@ -2,235 +2,763 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Agent Dashboard</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PropBot AI — Agent Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <style>
-body { font-family: Arial; margin:0; display:flex; }
-.sidebar { width:200px; background:#111; color:#fff; padding:15px; }
-.main { flex:1; padding:20px; }
-button { padding:8px 12px; cursor:pointer; }
-.chat { border:1px solid #ddd; padding:10px; height:300px; overflow:auto; }
+  :root {
+    --bg:#f8f6f1; --black:#111; --white:#fff;
+    --green:#16a34a; --green-light:#22c55e; --green-pale:#dcfce7;
+    --amber:#d97706; --amber-pale:#fef3c7;
+    --red:#dc2626; --red-pale:#fee2e2;
+    --blue:#2563eb; --blue-pale:#dbeafe;
+    --border:#e5e0d8; --shadow:0 1px 4px rgba(0,0,0,0.07);
+    --mono:'JetBrains Mono',monospace;
+    --sans:'Space Grotesk',sans-serif;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;font-family:var(--sans);}
+  body{background:var(--bg);color:var(--black);}
+
+  /* ── AUTH SCREENS ── */
+  .auth-wrap{min-height:100vh;display:grid;grid-template-columns:1fr 1fr;}
+  .auth-left{background:var(--black);display:flex;flex-direction:column;justify-content:center;padding:4rem;position:relative;overflow:hidden;}
+  .auth-left::before{content:'';position:absolute;width:400px;height:400px;background:radial-gradient(circle,rgba(34,197,94,0.15) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);}
+  .auth-brand{font-size:1.5rem;font-weight:700;color:#fff;display:flex;align-items:center;gap:0.5rem;margin-bottom:3rem;position:relative;}
+  .brand-dot{width:10px;height:10px;background:var(--green-light);border-radius:50%;box-shadow:0 0 10px var(--green-light);animation:pulse 2s infinite;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+  .auth-tagline{position:relative;}
+  .auth-tagline h1{font-size:2.5rem;font-weight:700;color:#fff;line-height:1.15;letter-spacing:-1px;margin-bottom:1rem;}
+  .auth-tagline h1 span{color:var(--green-light);}
+  .auth-tagline p{color:rgba(255,255,255,0.5);font-size:0.95rem;line-height:1.6;max-width:340px;}
+  .auth-stats{display:flex;gap:2rem;margin-top:2.5rem;position:relative;}
+  .auth-stat .num{font-family:var(--mono);font-size:1.8rem;font-weight:600;color:var(--green-light);}
+  .auth-stat .lbl{font-size:0.75rem;color:rgba(255,255,255,0.4);margin-top:2px;}
+
+  .auth-right{display:flex;align-items:center;justify-content:center;padding:3rem 4rem;}
+  .auth-box{width:100%;max-width:400px;}
+  .auth-tabs{display:flex;gap:0;margin-bottom:2rem;background:var(--border);border-radius:10px;padding:3px;}
+  .auth-tab{flex:1;padding:0.6rem;text-align:center;font-size:0.85rem;font-weight:600;border-radius:8px;cursor:pointer;transition:all 0.2s;color:#888;}
+  .auth-tab.active{background:#fff;color:var(--black);box-shadow:var(--shadow);}
+  .auth-title{font-size:1.4rem;font-weight:700;margin-bottom:0.4rem;letter-spacing:-0.5px;}
+  .auth-sub{font-size:0.83rem;color:#888;margin-bottom:1.8rem;}
+
+  .form-group{margin-bottom:1rem;}
+  .form-group label{display:block;font-size:0.75rem;font-weight:600;color:#555;margin-bottom:0.35rem;letter-spacing:0.3px;text-transform:uppercase;}
+  .form-group input,.form-group select{width:100%;padding:0.75rem 1rem;border:1.5px solid var(--border);border-radius:10px;font-size:0.88rem;font-family:var(--sans);background:#fff;color:var(--black);outline:none;transition:border-color 0.2s;}
+  .form-group input:focus,.form-group select:focus{border-color:var(--green-light);}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;}
+
+  .auth-btn{width:100%;padding:0.85rem;background:var(--black);color:#fff;font-family:var(--sans);font-weight:700;font-size:0.95rem;border:none;border-radius:10px;cursor:pointer;transition:all 0.2s;margin-top:0.5rem;}
+  .auth-btn:hover{background:#222;transform:translateY(-1px);}
+  .auth-btn:disabled{background:#ccc;cursor:not-allowed;transform:none;}
+  .auth-btn.green-btn{background:var(--green);box-shadow:0 0 20px rgba(34,197,94,0.2);}
+  .auth-btn.green-btn:hover{background:#15803d;}
+
+  .auth-divider{text-align:center;margin:1.2rem 0;font-size:0.78rem;color:#aaa;position:relative;}
+  .auth-divider::before{content:'';position:absolute;top:50%;left:0;right:0;height:1px;background:var(--border);}
+  .auth-divider span{background:var(--bg);padding:0 0.8rem;position:relative;}
+
+  .auth-msg{padding:0.7rem 1rem;border-radius:8px;font-size:0.82rem;margin-bottom:1rem;display:none;}
+  .auth-msg.error{background:var(--red-pale);color:var(--red);display:block;}
+  .auth-msg.success{background:var(--green-pale);color:var(--green);display:block;}
+
+  /* ── DASHBOARD ── */
+  .dashboard{display:none;height:100vh;flex-direction:row;}
+  .dashboard.show{display:flex;}
+
+  .sidebar{width:230px;background:var(--black);display:flex;flex-direction:column;flex-shrink:0;}
+  .sb-logo{padding:1.5rem 1.2rem;font-weight:700;font-size:0.9rem;color:#fff;display:flex;align-items:center;gap:0.5rem;border-bottom:1px solid rgba(255,255,255,0.06);}
+  .sb-dot{width:8px;height:8px;background:var(--green-light);border-radius:50%;box-shadow:0 0 8px var(--green-light);animation:pulse 2s infinite;}
+  .sb-section{padding:1rem 0.8rem 0.3rem;font-size:0.6rem;font-family:var(--mono);color:rgba(255,255,255,0.25);letter-spacing:2px;text-transform:uppercase;}
+  .sb-item{display:flex;align-items:center;gap:0.7rem;padding:0.6rem 1rem;margin:0.1rem 0.5rem;border-radius:8px;font-size:0.82rem;color:rgba(255,255,255,0.5);cursor:pointer;transition:all 0.15s;font-weight:500;}
+  .sb-item:hover{background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.85);}
+  .sb-item.active{background:rgba(34,197,94,0.15);color:var(--green-light);}
+  .sb-badge{margin-left:auto;background:var(--green-light);color:#fff;font-size:0.6rem;font-family:var(--mono);font-weight:700;padding:0.15rem 0.45rem;border-radius:100px;}
+  .sb-bottom{margin-top:auto;padding:1rem;border-top:1px solid rgba(255,255,255,0.06);}
+  .sb-agent{display:flex;align-items:center;gap:0.7rem;padding:0.5rem;border-radius:8px;}
+  .sb-avatar{width:34px;height:34px;background:var(--green);border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;color:#fff;flex-shrink:0;}
+  .sb-name{font-size:0.8rem;font-weight:600;color:rgba(255,255,255,0.85);}
+  .sb-plan{font-size:0.65rem;color:var(--green-light);font-family:var(--mono);}
+  .sb-logout{width:100%;margin-top:0.5rem;padding:0.5rem;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:8px;color:rgba(255,255,255,0.4);font-size:0.75rem;font-family:var(--sans);cursor:pointer;transition:all 0.15s;}
+  .sb-logout:hover{background:rgba(220,38,38,0.1);color:#f87171;border-color:rgba(220,38,38,0.2);}
+
+  .main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+  .topbar{background:var(--bg);border-bottom:1px solid var(--border);padding:0.9rem 2rem;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+  .page-title{font-size:1rem;font-weight:700;letter-spacing:-0.3px;}
+  .page-sub{font-size:0.72rem;color:#999;font-family:var(--mono);margin-top:1px;}
+  .topbar-right{display:flex;align-items:center;gap:0.8rem;}
+  .pill{display:inline-flex;align-items:center;gap:0.4rem;font-size:0.72rem;font-weight:600;font-family:var(--mono);padding:0.35rem 0.75rem;border-radius:100px;border:1px solid;}
+  .pill.green{background:var(--green-pale);color:var(--green);border-color:rgba(22,163,74,0.2);}
+  .pill.blue{background:var(--blue-pale);color:var(--blue);border-color:rgba(37,99,235,0.2);}
+  .pill-dot{width:6px;height:6px;border-radius:50%;animation:pulse 1.5s infinite;}
+  .pill.green .pill-dot{background:var(--green-light);}
+  .pill.blue .pill-dot{background:var(--blue);}
+
+  .content{flex:1;overflow-y:auto;padding:1.5rem 2rem;display:flex;flex-direction:column;gap:1.4rem;}
+
+  /* STATS */
+  .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;}
+  .stat-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:1.2rem 1.4rem;box-shadow:var(--shadow);position:relative;overflow:hidden;}
+  .stat-card::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+  .stat-card.c-green::after{background:var(--green-light);}
+  .stat-card.c-amber::after{background:var(--amber);}
+  .stat-card.c-blue::after{background:var(--blue);}
+  .stat-card.c-red::after{background:var(--red);}
+  .stat-label{font-size:0.68rem;font-family:var(--mono);color:#999;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem;}
+  .stat-value{font-size:2rem;font-weight:700;font-family:var(--mono);line-height:1;margin-bottom:0.25rem;}
+  .stat-card.c-green .stat-value{color:var(--green);}
+  .stat-card.c-amber .stat-value{color:var(--amber);}
+  .stat-card.c-blue .stat-value{color:var(--blue);}
+  .stat-card.c-red .stat-value{color:var(--red);}
+  .stat-meta{font-size:0.68rem;color:#bbb;font-family:var(--mono);}
+
+  /* GRID */
+  .main-grid{display:grid;grid-template-columns:1fr 360px;gap:1.2rem;}
+
+  /* CARD */
+  .card{background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);overflow:hidden;}
+  .card-hdr{padding:0.9rem 1.3rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+  .card-title{font-size:0.88rem;font-weight:700;}
+  .card-sub{font-size:0.68rem;color:#999;font-family:var(--mono);margin-top:1px;}
+  .card-btn{font-size:0.7rem;color:var(--green);font-weight:600;cursor:pointer;font-family:var(--mono);background:var(--green-pale);padding:0.3rem 0.7rem;border-radius:6px;border:1px solid rgba(22,163,74,0.2);transition:all 0.15s;}
+  .card-btn:hover{background:var(--green);color:#fff;}
+
+  /* TABLE */
+  table{width:100%;border-collapse:collapse;font-size:0.79rem;}
+  th{text-align:left;padding:0.6rem 1rem;font-size:0.62rem;font-family:var(--mono);color:#aaa;text-transform:uppercase;letter-spacing:0.5px;font-weight:500;border-bottom:1px solid var(--border);background:#fafaf8;}
+  td{padding:0.7rem 1rem;border-bottom:1px solid var(--border);vertical-align:middle;}
+  tr:last-child td{border-bottom:none;}
+  tr:hover td{background:#fafaf8;}
+  .lname{font-weight:600;font-size:0.82rem;}
+  .lphone{font-size:0.68rem;color:#999;font-family:var(--mono);}
+  .tag{display:inline-flex;align-items:center;font-size:0.66rem;font-weight:600;padding:0.2rem 0.5rem;border-radius:5px;font-family:var(--mono);}
+  .tag.hot{background:#fee2e2;color:var(--red);}
+  .tag.warm{background:var(--amber-pale);color:var(--amber);}
+  .tag.cold{background:var(--blue-pale);color:var(--blue);}
+  .bgt{font-family:var(--mono);font-size:0.75rem;font-weight:600;color:var(--green);}
+  .tago{font-family:var(--mono);font-size:0.68rem;color:#bbb;}
+  .abtn{padding:0.28rem 0.6rem;border-radius:5px;font-size:0.66rem;font-family:var(--mono);font-weight:600;border:1px solid var(--border);background:#fff;cursor:pointer;transition:all 0.15s;}
+  .abtn:hover{background:var(--black);color:#fff;border-color:var(--black);}
+  .empty{text-align:center;padding:2.5rem;color:#bbb;font-size:0.8rem;font-family:var(--mono);}
+  .empty .ei{font-size:2rem;margin-bottom:0.5rem;}
+
+  /* CHAT PANEL */
+  .chat-panel{display:flex;flex-direction:column;max-height:520px;}
+  .chat-msgs{flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:0.65rem;background:#fafaf8;min-height:220px;max-height:330px;}
+  .chat-foot{padding:0.75rem 1rem;border-top:1px solid var(--border);display:flex;gap:0.6rem;align-items:flex-end;}
+  .chat-in{flex:1;border:1.5px solid var(--border);border-radius:8px;padding:0.6rem 0.8rem;font-size:0.8rem;font-family:var(--sans);resize:none;outline:none;background:#fff;transition:border-color 0.2s;max-height:80px;min-height:36px;}
+  .chat-in:focus{border-color:var(--green-light);}
+  .send-btn{width:36px;height:36px;background:var(--green);border:none;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:0.9rem;transition:all 0.15s;flex-shrink:0;color:#fff;}
+  .send-btn:hover{background:#15803d;}
+  .send-btn:disabled{background:#ccc;cursor:not-allowed;}
+  .ai-bar{padding:0.5rem 1rem;background:var(--green-pale);border-top:1px solid rgba(22,163,74,0.1);font-size:0.68rem;color:var(--green);font-family:var(--mono);}
+
+  .mrow{display:flex;flex-direction:column;}
+  .mrow.user{align-items:flex-end;}.mrow.ai{align-items:flex-start;}
+  .mlabel{font-size:0.58rem;font-family:var(--mono);color:#bbb;margin-bottom:2px;padding:0 4px;}
+  .mbubble{padding:0.5rem 0.75rem;border-radius:10px;font-size:0.78rem;line-height:1.5;max-width:90%;}
+  .mrow.user .mbubble{background:var(--black);color:#fff;border-bottom-right-radius:3px;}
+  .mrow.ai .mbubble{background:#fff;color:var(--black);border:1px solid var(--border);border-bottom-left-radius:3px;box-shadow:var(--shadow);}
+  .mtime{font-size:0.58rem;font-family:var(--mono);color:#bbb;margin-top:2px;padding:0 4px;}
+  .tbubble{background:#fff;border:1px solid var(--border);border-radius:10px;border-bottom-left-radius:3px;padding:0.6rem 0.8rem;display:flex;gap:4px;align-items:center;width:fit-content;}
+  .td{width:5px;height:5px;background:#ccc;border-radius:50%;animation:bounce 1.2s infinite;}
+  .td:nth-child(2){animation-delay:0.15s;}.td:nth-child(3){animation-delay:0.3s;}
+  @keyframes bounce{0%,60%,100%{transform:translateY(0);opacity:0.4}30%{transform:translateY(-4px);opacity:1}}
+
+  /* ACTIVITY */
+  .act-item{display:flex;align-items:flex-start;gap:0.75rem;padding:0.65rem 1.2rem;border-bottom:1px solid var(--border);}
+  .act-item:last-child{border-bottom:none;}
+  .act-icon{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:0.72rem;flex-shrink:0;}
+  .act-text{font-size:0.75rem;color:#555;line-height:1.4;flex:1;}
+  .act-text strong{color:var(--black);font-weight:600;}
+  .act-time{font-size:0.62rem;font-family:var(--mono);color:#bbb;flex-shrink:0;}
+
+  /* WHATSAPP SETUP CARD */
+  .setup-card{background:var(--black);border-radius:12px;padding:1.5rem;color:#fff;}
+  .setup-title{font-size:0.9rem;font-weight:700;margin-bottom:0.4rem;}
+  .setup-sub{font-size:0.78rem;color:rgba(255,255,255,0.5);margin-bottom:1.2rem;line-height:1.5;}
+  .setup-number{font-family:var(--mono);font-size:1.1rem;font-weight:600;color:var(--green-light);background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.2);border-radius:8px;padding:0.6rem 1rem;margin-bottom:1rem;letter-spacing:1px;}
+  .setup-steps{display:flex;flex-direction:column;gap:0.6rem;}
+  .setup-step{display:flex;align-items:flex-start;gap:0.6rem;font-size:0.78rem;color:rgba(255,255,255,0.6);}
+  .step-num{width:20px;height:20px;background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.3);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:700;color:var(--green-light);flex-shrink:0;}
+
+  @keyframes slideIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+  .newrow{animation:slideIn 0.3s ease;}
+  ::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.1);border-radius:4px;}
+  .spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:sp 0.7s linear infinite;}
+  @keyframes sp{to{transform:rotate(360deg)}}
+
+  @media(max-width:768px){
+    .auth-wrap{grid-template-columns:1fr;}.auth-left{display:none;}
+    .stats-row{grid-template-columns:1fr 1fr;}
+    .main-grid{grid-template-columns:1fr;}
+  }
 </style>
 </head>
-
 <body>
 
-<!-- SIDEBAR -->
-<div class="sidebar">
-  <h3>Agent</h3>
-  <div id="agent-name">...</div>
-  <br>
-  <button onclick="logout()">Logout</button>
+<!-- ═══ AUTH SCREEN ═══ -->
+<div class="auth-wrap" id="auth-screen">
+  <div class="auth-left">
+    <div class="auth-brand"><div class="brand-dot"></div>PropBot AI</div>
+    <div class="auth-tagline">
+      <h1>Your AI agent<br>that <span>never sleeps</span></h1>
+      <p>Replies to every buyer on WhatsApp 24/7 in Hindi & English. Qualify leads, book visits, follow up — automatically.</p>
+      <div class="auth-stats">
+        <div class="auth-stat"><div class="num">24/7</div><div class="lbl">Always online</div></div>
+        <div class="auth-stat"><div class="num">&lt;5s</div><div class="lbl">Reply time</div></div>
+        <div class="auth-stat"><div class="num">3x</div><div class="lbl">More visits</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="auth-right">
+    <div class="auth-box">
+      <div class="auth-tabs">
+        <div class="auth-tab active" onclick="switchTab('login')">Login</div>
+        <div class="auth-tab" onclick="switchTab('signup')">Sign Up</div>
+      </div>
+
+      <div id="auth-msg" class="auth-msg"></div>
+
+      <!-- LOGIN FORM -->
+      <div id="login-form">
+        <div class="auth-title">Welcome back 👋</div>
+        <div class="auth-sub">Login to your PropBot dashboard</div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="l-email" placeholder="rahul@gmail.com">
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="l-pass" placeholder="••••••••">
+        </div>
+        <button class="auth-btn green-btn" onclick="handleLogin()" id="login-btn">Login to Dashboard</button>
+      </div>
+
+      <!-- SIGNUP FORM -->
+      <div id="signup-form" style="display:none;">
+        <div class="auth-title">Create account 🚀</div>
+        <div class="auth-sub">Start your 14-day free trial — no card needed</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>First Name</label>
+            <input type="text" id="s-fname" placeholder="Rahul">
+          </div>
+          <div class="form-group">
+            <label>Last Name</label>
+            <input type="text" id="s-lname" placeholder="Sharma">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="s-email" placeholder="rahul@gmail.com">
+        </div>
+        <div class="form-group">
+          <label>WhatsApp Number</label>
+          <input type="tel" id="s-phone" placeholder="+91 98765 43210">
+        </div>
+        <div class="form-group">
+          <label>City</label>
+          <select id="s-city">
+            <option value="">Select city</option>
+            <option>Nashik</option><option>Pune</option><option>Nagpur</option><option>Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="s-pass" placeholder="Min 6 characters">
+        </div>
+        <button class="auth-btn green-btn" onclick="handleSignup()" id="signup-btn">Create Free Account</button>
+      </div>
+    </div>
+  </div>
 </div>
 
-<!-- MAIN -->
-<div class="main">
-  <h2>Dashboard</h2>
+<!-- ═══ DASHBOARD ═══ -->
+<div class="dashboard" id="dashboard">
 
-  <h3>Properties</h3>
-  <div id="prop-list"></div>
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sb-logo"><div class="sb-dot"></div>PropBot AI</div>
+    <div class="sb-section">Main</div>
+    <div class="sb-item active" onclick="location.href='agent-portal.html'">⚡ Dashboard <span class="sb-badge" id="hot-badge">0</span></div>
+    <div class="sb-item">💬 Conversations</div>
+    <div class="sb-item">👥 All Leads</div>
+    <div class="sb-section">Manage</div>
+    <div class="sb-item" onclick="location.href='properties.html'">🏠 My Properties</div>
+    <div class="sb-item">📅 Site Visits</div>
+    <div class="sb-item">🔁 Follow-ups</div>
+    <div class="sb-section">Account</div>
+    <div class="sb-item">⚙️ Settings</div>
+    <div class="sb-item">💳 Billing</div>
+    <div class="sb-bottom">
+      <div class="sb-agent">
+        <div class="sb-avatar" id="sb-avatar">?</div>
+        <div>
+          <div class="sb-name" id="sb-name">Loading...</div>
+          <div class="sb-plan" id="sb-plan">PRO · Trial</div>
+        </div>
+      </div>
+      <button class="sb-logout" onclick="handleLogout()">↩ Logout</button>
+    </div>
+  </div>
 
-  <h3>AI Chat</h3>
-  <div class="chat" id="chat"></div>
-  <input id="msg" placeholder="Type..." />
-  <button onclick="sendMsg()">Send</button>
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="page-title">My Dashboard</div>
+        <div class="page-sub" id="topbar-date"></div>
+      </div>
+      <div class="topbar-right">
+        <div class="pill blue" id="db-pill"><div class="pill-dot"></div><span id="db-txt">Connecting...</span></div>
+        <div class="pill green"><div class="pill-dot"></div>AI Agent Online</div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- STATS -->
+      <div class="stats-row">
+        <div class="stat-card c-green"><div class="stat-label">My Total Leads</div><div class="stat-value" id="s-total">—</div><div class="stat-meta">In your account</div></div>
+        <div class="stat-card c-amber"><div class="stat-label">Hot Leads</div><div class="stat-value" id="s-hot">—</div><div class="stat-meta">Ready to visit</div></div>
+        <div class="stat-card c-blue"><div class="stat-label">Today's Leads</div><div class="stat-value" id="s-today">—</div><div class="stat-meta">Since midnight</div></div>
+        <div class="stat-card c-red"><div class="stat-label">AI Replies</div><div class="stat-value" id="s-replies">0</div><div class="stat-meta">This session</div></div>
+      </div>
+
+      <!-- MAIN GRID -->
+      <div class="main-grid">
+        <div style="display:flex;flex-direction:column;gap:1.2rem;">
+
+          <!-- LEADS TABLE -->
+          <div class="card">
+            <div class="card-hdr">
+              <div><div class="card-title">My Leads</div><div class="card-sub">Only your leads — private to your account</div></div>
+              <div class="card-btn" onclick="loadLeads()">↻ Refresh</div>
+            </div>
+            <table>
+              <thead><tr><th>Buyer</th><th>Requirement</th><th>Budget</th><th>Score</th><th>Time</th><th>Action</th></tr></thead>
+              <tbody id="leads-tbody">
+                <tr><td colspan="6"><div class="empty"><div class="ei">⏳</div>Loading your leads...</div></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- ACTIVITY LOG -->
+          <div class="card">
+            <div class="card-hdr"><div><div class="card-title">AI Activity</div><div class="card-sub">What your agent did</div></div></div>
+            <div id="act-log">
+              <div class="act-item"><div class="act-icon" style="background:#dcfce7;">🤖</div><div class="act-text">Your <strong>AI agent is active</strong> and ready to reply to buyer messages.</div><div class="act-time">now</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN -->
+        <div style="display:flex;flex-direction:column;gap:1.2rem;">
+
+          <!-- WHATSAPP SETUP -->
+          <div class="setup-card">
+            <div class="setup-title">📱 Your WhatsApp Number</div>
+            <div class="setup-sub">Buyers message this number. Your AI agent replies instantly.</div>
+            <div class="setup-number" id="agent-wa-number">+14155238886</div>
+            <div class="setup-steps">
+              <div class="setup-step"><div class="step-num">1</div><span>Share this number with buyers</span></div>
+              <div class="setup-step"><div class="step-num">2</div><span>AI replies automatically 24/7</span></div>
+              <div class="setup-step"><div class="step-num">3</div><span>Leads appear in your dashboard</span></div>
+            </div>
+          </div>
+
+          <!-- AI TEST CHAT -->
+          <div class="card chat-panel">
+            <div class="card-hdr"><div><div class="card-title">🤖 Test AI Agent</div><div class="card-sub">Simulate buyer message</div></div></div>
+            <div class="chat-msgs" id="chat-msgs">
+              <div class="mrow ai">
+                <div class="mlabel">⚡ AI Agent</div>
+                <div class="mbubble">Namaste! Main aapka AI property assistant hoon. Kaunsa property dhundh rahe hain? 🏠</div>
+                <div class="mtime">Ready</div>
+              </div>
+            </div>
+            <div class="ai-bar">⚡ Gemini AI · Your leads only</div>
+            <div class="chat-foot">
+              <textarea class="chat-in" id="chat-in" placeholder="Type buyer message..." rows="1"></textarea>
+              <button class="send-btn" id="send-btn" onclick="sendMsg()">➤</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
-
-// ── SUPABASE ──
+// ═══════════════════════════════════════════
+// SUPABASE SETUP
+// ═══════════════════════════════════════════
 const { createClient } = supabase;
 const db = createClient(
   'https://zejcequtmrmetogbxudz.supabase.co',
   'sb_publishable_MDKa6Y4VCUoVA_UeBdaQ8w_93qDws5E'
 );
 
-let currentUser = null;
-let properties = [];
+const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-8b:generateContent?key=AIzaSyBqdGK5fk9GGQKpcb2uInnWV1CvqUPi5nQ';
 
-// ── INIT ──
+const AGENT_PROMPT = `You are an expert AI real estate assistant for a property agent in Nashik, Maharashtra, India.
+Reply in Hindi+English (Hinglish). Max 4-5 lines. WhatsApp style.
+Listings: 1BHK Panchavati Rs24L | 2BHK Gangapur Rs48.5L | 2BHK Ambad Rs40L | 3BHK Satpur Rs75L | 3BHK College Rd Rs95L
+Ask about BHK, budget, location. Offer site visit. Never say you are AI.`;
+
+let currentAgent = null;
+let convHistory = [];
+let sessionReplies = 0;
+
+// ═══════════════════════════════════════════
+// INIT — Check if already logged in
+// ═══════════════════════════════════════════
+document.getElementById('topbar-date').textContent =
+  new Date().toLocaleDateString('en-IN', { weekday:'long', day:'numeric', month:'short', year:'numeric' });
+
 (async () => {
-
   const { data: { session } } = await db.auth.getSession();
-
-  if (!session) {
-    window.location.href = "/agent-portal.html";
-    return;
+  if (session) {
+    await loadAgentProfile(session.user);
+    showDashboard();
   }
-
-  currentUser = session.user;
-
-  // load profile
-  const { data: profile } = await db
-    .from('agents')
-    .select('*')
-    .eq('id', currentUser.id)
-    .single();
-
-  document.getElementById('agent-name').innerText =
-    profile?.name || "Agent";
-
-  await loadProperties();
-
 })();
 
-// ── LOGOUT ──
-async function logout() {
-  await db.auth.signOut();
-  window.location.href = "/";
+// ═══════════════════════════════════════════
+// AUTH TAB SWITCH
+// ═══════════════════════════════════════════
+function switchTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach((t,i) => {
+    t.classList.toggle('active', (i===0 && tab==='login') || (i===1 && tab==='signup'));
+  });
+  document.getElementById('login-form').style.display  = tab==='login'  ? 'block' : 'none';
+  document.getElementById('signup-form').style.display = tab==='signup' ? 'block' : 'none';
+  clearMsg();
 }
 
-// ── LOAD PROPERTIES ──
-async function loadProperties() {
-  const { data } = await db
-    .from('properties')
-    .select('*')
-    .eq('agent_id', currentUser.id);
-
-  properties = data || [];
-
-  document.getElementById('prop-list').innerHTML =
-    properties.map(p => `
-      <div>
-        ${p.bhk || ''} - ${p.location} - ₹${p.price}L
-      </div>
-    `).join('');
+function showMsg(msg, type='error') {
+  const el = document.getElementById('auth-msg');
+  el.textContent = msg;
+  el.className = `auth-msg ${type}`;
+}
+function clearMsg() {
+  const el = document.getElementById('auth-msg');
+  el.className = 'auth-msg';
 }
 
-// ── AI INTENT EXTRACTOR (DYNAMIC) ──
-async function extractIntentAI(text) {
+// ═══════════════════════════════════════════
+// SIGNUP
+// ═══════════════════════════════════════════
+async function handleSignup() {
+  const fname = document.getElementById('s-fname').value.trim();
+  const lname  = document.getElementById('s-lname').value.trim();
+  const email  = document.getElementById('s-email').value.trim();
+  const phone  = document.getElementById('s-phone').value.trim();
+  const city   = document.getElementById('s-city').value;
+  const pass   = document.getElementById('s-pass').value;
+
+  if (!fname||!email||!phone||!city||!pass) return showMsg('Please fill all fields');
+  if (pass.length < 6) return showMsg('Password must be at least 6 characters');
+
+  const btn = document.getElementById('signup-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spin"></div> Creating account...';
+
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    // 1. Create Supabase auth account
+    const { data, error } = await db.auth.signUp({
+      email, password: pass,
+      options: { data: { full_name: `${fname} ${lname}`, phone, city } }
+    });
+    if (error) throw error;
+
+    // 2. Save agent profile to agents table
+    await db.from('agents').insert([{
+      id: data.user.id,
+      name: `${fname} ${lname}`,
+      email, phone, city,
+      plan: 'trial',
+      status: 'active',
+      trial_start: new Date().toISOString()
+    }]);
+
+    showMsg('✅ Account created! Logging you in...', 'success');
+    // Note: Make sure email confirmation is OFF in Supabase Auth settings
+
+    // 3. Auto login
+    await db.auth.signInWithPassword({ email, password: pass });
+    await loadAgentProfile(data.user);
+    setTimeout(showDashboard, 1000);
+
+  } catch(e) {
+    showMsg(e.message);
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Create Free Account';
+}
+
+// ═══════════════════════════════════════════
+// LOGIN
+// ═══════════════════════════════════════════
+async function handleLogin() {
+  const email = document.getElementById('l-email').value.trim();
+  const pass  = document.getElementById('l-pass').value;
+
+  if (!email||!pass) return showMsg('Please enter email and password');
+
+  const btn = document.getElementById('login-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spin"></div> Logging in...';
+
+  try {
+    const { data, error } = await db.auth.signInWithPassword({ email, password: pass });
+    if (error) throw error;
+
+    await loadAgentProfile(data.user);
+    showDashboard();
+
+  } catch(e) {
+    showMsg(e.message || 'Invalid email or password. If new account, please sign up first.');
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Login to Dashboard';
+}
+
+// ═══════════════════════════════════════════
+// LOGOUT
+// ═══════════════════════════════════════════
+async function handleLogout() {
+  await db.auth.signOut();
+  currentAgent = null;
+  document.getElementById('dashboard').classList.remove('show');
+  document.getElementById('auth-screen').style.display = 'grid';
+  switchTab('login');
+}
+
+// ═══════════════════════════════════════════
+// LOAD AGENT PROFILE
+// ═══════════════════════════════════════════
+async function loadAgentProfile(user) {
+  try {
+    const { data } = await db.from('agents').select('*').eq('id', user.id).single();
+    currentAgent = data || {
+      id: user.id,
+      name: user.user_metadata?.full_name || user.email,
+      city: user.user_metadata?.city || 'Nashik',
+      plan: 'trial'
+    };
+  } catch(e) {
+    currentAgent = { id: user.id, name: user.email, city: 'Nashik', plan: 'trial' };
+  }
+
+  // Update sidebar
+  const initials = currentAgent.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+  document.getElementById('sb-avatar').textContent = initials;
+  document.getElementById('sb-name').textContent = currentAgent.name;
+  document.getElementById('sb-plan').textContent = `${currentAgent.plan?.toUpperCase()} · ${currentAgent.city}`;
+  document.getElementById('topbar-date').textContent =
+    new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'short'}) + ` · ${currentAgent.city}`;
+}
+
+// ═══════════════════════════════════════════
+// SHOW DASHBOARD
+// ═══════════════════════════════════════════
+function showDashboard() {
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('dashboard').classList.add('show');
+  loadLeads();
+  loadStats();
+  setPill('blue', '✓ Connected · Your Data Only');
+}
+
+function setPill(cls, txt) {
+  const p = document.getElementById('db-pill');
+  p.className = `pill ${cls}`;
+  p.innerHTML = `<div class="pill-dot"></div><span>${txt}</span>`;
+}
+
+// ═══════════════════════════════════════════
+// LOAD LEADS — FILTERED BY AGENT ID
+// ═══════════════════════════════════════════
+async function loadLeads() {
+  if (!currentAgent) return;
+  try {
+    const { data, error } = await db
+      .from('leads')
+      .select('*')
+      .eq('agent_id', currentAgent.id)   // ← KEY: only THIS agent's leads
+      .order('created_at', { ascending: false })
+      .limit(20);
+
+    if (error) throw error;
+
+    const tb = document.getElementById('leads-tbody');
+    if (!data?.length) {
+      tb.innerHTML = `<tr><td colspan="6"><div class="empty"><div class="ei">🤖</div>No leads yet. Your AI agent will add them automatically!</div></td></tr>`;
+      return;
+    }
+
+    tb.innerHTML = data.map(l => `
+      <tr class="newrow">
+        <td><div class="lname">${l.name||'Buyer'}</div><div class="lphone">${l.phone||'—'}</div></td>
+        <td><span style="font-size:0.76rem;color:#555">${l.bhk||'?'} · ${l.location||currentAgent.city}</span></td>
+        <td><span class="bgt">${l.budget_max?'₹'+l.budget_max+'L':'?'}</span></td>
+        <td>${scoreTag(l.score)}</td>
+        <td><span class="tago">${ago(l.created_at)}</span></td>
+        <td><button class="abtn">${l.score==='hot'?'Call Now':l.score==='warm'?'Follow Up':'Nurture'}</button></td>
+      </tr>`).join('');
+  } catch(e) {
+    console.error('Load leads error:', e);
+  }
+}
+
+// ═══════════════════════════════════════════
+// LOAD STATS — FILTERED BY AGENT ID
+// ═══════════════════════════════════════════
+async function loadStats() {
+  if (!currentAgent) return;
+  try {
+    const { data } = await db
+      .from('leads')
+      .select('id,score,created_at')
+      .eq('agent_id', currentAgent.id); // ← only THIS agent's stats
+
+    if (!data) return;
+    const today = new Date().toDateString();
+    const hot = data.filter(l=>l.score==='hot').length;
+    document.getElementById('s-total').textContent = data.length;
+    document.getElementById('s-hot').textContent = hot;
+    document.getElementById('s-today').textContent = data.filter(l=>new Date(l.created_at).toDateString()===today).length;
+    document.getElementById('hot-badge').textContent = hot;
+  } catch(e) {}
+}
+
+// ═══════════════════════════════════════════
+// AI TEST CHAT
+// ═══════════════════════════════════════════
+async function sendMsg() {
+  const inp = document.getElementById('chat-in');
+  const btn = document.getElementById('send-btn');
+  const txt = inp.value.trim();
+  if (!txt) return;
+
+  inp.value = ''; inp.style.height = 'auto';
+  btn.disabled = true; btn.innerHTML = '⏳';
+
+  addBubble('user', txt);
+  convHistory.push({ role:'user', parts:[{ text:txt }] });
+  showTyping();
+
+  try {
+    const res = await fetch(GEMINI_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 200,
-        system: `
-Extract real estate intent. Return JSON only.
-
-{
- "property_type": "flat | villa | plot | shop | office | unknown",
- "bhk": number | null,
- "budget": number | null,
- "location": string | null
-}
-        `,
-        messages: [{ role: 'user', content: text }]
+        system_instruction: { parts:[{ text: AGENT_PROMPT }] },
+        contents: convHistory,
+        generationConfig: { maxOutputTokens:200, temperature:0.7 }
       })
     });
+    const d = await res.json();
+    const reply = d.candidates?.[0]?.content?.parts?.[0]?.text || fallback(txt);
+    removeTyping(); addBubble('ai', reply);
+    convHistory.push({ role:'model', parts:[{ text:reply }] });
 
-    const data = await res.json();
-    return JSON.parse(data.content?.[0]?.text || "{}");
+    // Save lead with agent_id
+    saveLead(txt, currentAgent?.id);
 
-  } catch {
-    return {};
+  } catch(e) {
+    removeTyping(); addBubble('ai', fallback(txt));
+    saveLead(txt, currentAgent?.id);
   }
+
+  sessionReplies++;
+  document.getElementById('s-replies').textContent = sessionReplies;
+  btn.disabled = false; btn.innerHTML = '➤';
+  inp.focus();
 }
 
-// ── FILTER ──
-function filterProperties(intent) {
-
-  let filtered = [...properties];
-
-  if (intent.property_type && intent.property_type !== 'unknown') {
-    filtered = filtered.filter(p =>
-      (p.details || '').toLowerCase().includes(intent.property_type)
-    );
-  }
-
-  if (intent.bhk) {
-    filtered = filtered.filter(p =>
-      (p.bhk || '').includes(intent.bhk.toString())
-    );
-  }
-
-  if (intent.budget) {
-    filtered = filtered.filter(p =>
-      p.price && p.price <= intent.budget + 15
-    );
-  }
-
-  if (intent.location) {
-    filtered = filtered.filter(p =>
-      (p.location + " " + p.city)
-        .toLowerCase()
-        .includes(intent.location.toLowerCase())
-    );
-  }
-
-  if (!filtered.length) {
-    filtered = properties.slice(0, 3);
-  }
-
-  return filtered.slice(0, 5);
-}
-
-// ── BUILD PROMPT ──
-function buildPrompt(list) {
-
-  const txt = list.map(p => `
-${p.bhk} in ${p.location}
-₹${p.price}L
-${p.description || ''}
-`).join('\n');
-
-  return `
-You are a real estate agent.
-Short replies. Suggest best option.
-
-Properties:
-${txt}
-`;
-}
-
-// ── CHAT UI ──
-function addMsg(role, text) {
-  const c = document.getElementById('chat');
-  c.innerHTML += `<div><b>${role}:</b> ${text}</div>`;
-  c.scrollTop = c.scrollHeight;
-}
-
-// ── SEND MESSAGE ──
-async function sendMsg() {
-
-  const input = document.getElementById('msg');
-  const text = input.value.trim();
-  if (!text) return;
-
-  input.value = '';
-
-  addMsg("User", text);
-
-  // 🔥 INTELLIGENCE FLOW
-  const intent = await extractIntentAI(text);
-  const matched = filterProperties(intent);
-  const prompt = buildPrompt(matched);
-
+// ═══════════════════════════════════════════
+// SAVE LEAD WITH AGENT ID
+// ═══════════════════════════════════════════
+async function saveLead(msg, agentId) {
+  if (!agentId) return;
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:300,
-        system: prompt,
-        messages:[{ role:'user', content:text }]
-      })
-    });
+    const { data } = await db.from('leads').insert([{
+      agent_id: agentId,           // ← links lead to THIS agent
+      name: 'Test Buyer',
+      phone: '+91 00000 00000',
+      location: currentAgent?.city || 'Nashik',
+      score: 'warm',
+      status: 'new'
+    }]).select();
 
-    const data = await res.json();
-    const reply = data.content?.[0]?.text || "Tell me more.";
-
-    addMsg("AI", reply);
-
-  } catch {
-    addMsg("AI", "Error. Try again.");
-  }
+    await loadLeads();
+    await loadStats();
+    addAct('💾', `New lead saved to <strong>your account</strong>`);
+  } catch(e) { console.error('Save error:', e); }
 }
 
+// ═══════════════════════════════════════════
+// UI HELPERS
+// ═══════════════════════════════════════════
+function addBubble(role, text) {
+  const c = document.getElementById('chat-msgs');
+  const d = document.createElement('div');
+  d.className = `mrow ${role==='user'?'user':'ai'}`;
+  d.innerHTML = `<div class="mlabel">${role==='ai'?'⚡ AI':'Buyer (Test)'}</div>
+    <div class="mbubble">${text.replace(/\n/g,'<br>')}</div>
+    <div class="mtime">${new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})}</div>`;
+  c.appendChild(d); c.scrollTop = c.scrollHeight;
+}
+
+function showTyping() {
+  const c = document.getElementById('chat-msgs');
+  const d = document.createElement('div'); d.id='typ'; d.className='mrow ai';
+  d.innerHTML = `<div class="tbubble"><div class="td"></div><div class="td"></div><div class="td"></div></div>`;
+  c.appendChild(d); c.scrollTop = c.scrollHeight;
+}
+function removeTyping() { const e=document.getElementById('typ'); if(e) e.remove(); }
+
+function addAct(icon, text, bg='#dcfce7') {
+  const log = document.getElementById('act-log');
+  const d = document.createElement('div'); d.className='act-item newrow';
+  d.innerHTML = `<div class="act-icon" style="background:${bg};">${icon}</div>
+    <div class="act-text">${text}</div>
+    <div class="act-time">${new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})}</div>`;
+  log.prepend(d);
+}
+
+function scoreTag(s) {
+  const m={hot:'<span class="tag hot">🔥 Hot</span>',warm:'<span class="tag warm">⚡ Warm</span>',cold:'<span class="tag cold">❄ Cold</span>'};
+  return m[s]||m.warm;
+}
+
+function ago(ts) {
+  const m=Math.floor((Date.now()-new Date(ts))/60000);
+  if(m<1) return 'just now'; if(m<60) return m+'m ago';
+  const h=Math.floor(m/60); if(h<24) return h+'h ago'; return Math.floor(h/24)+'d ago';
+}
+
+function fallback(t) {
+  t=t.toLowerCase();
+  if(t.includes('2bhk')) return 'Namaste! Gangapur Road pe 2BHK hai — ₹48.5L, ready to move 🏠\nKya kal site visit karenge?';
+  if(t.includes('3bhk')) return '3BHK ke liye:\n• Satpur ₹75L - pool+gym\n• College Rd ₹95L - premium\nKaunsa area?';
+  return 'Namaste! 😊 Kaunsa BHK chahiye aur budget kya hai?';
+}
+
+document.getElementById('chat-in').addEventListener('keydown', e => {
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}
+});
+document.getElementById('chat-in').addEventListener('input', function(){
+  this.style.height='auto'; this.style.height=Math.min(this.scrollHeight,80)+'px';
+});
 </script>
 </body>
 </html>
