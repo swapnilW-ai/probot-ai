@@ -9,6 +9,7 @@
 
     { "src": "/", "dest": "/index.html" },
 
+    { "src": "/portal", "dest": "/agent-portal.html" },
     { "src": "/dashboard", "dest": "/agent-dashboard.html" },
     { "src": "/properties", "dest": "/properties.html" },
 
