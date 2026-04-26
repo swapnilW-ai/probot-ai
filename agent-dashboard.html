@@ -6,11 +6,15 @@
 <title>PropBot AI</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:Inter;background:#f6f7fb}
+
+body{
+  font-family:'Inter',sans-serif;
+  background:#f4f6fb;
+}
 
 /* AUTH */
 #auth-screen{
@@ -23,83 +27,186 @@ body{font-family:Inter;background:#f6f7fb}
 .auth-box{
   background:#fff;
   padding:30px;
-  border-radius:12px;
+  border-radius:14px;
   width:320px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.1);
 }
 
 .auth-box input{
   width:100%;
-  padding:10px;
+  padding:12px;
   margin:8px 0;
   border:1px solid #ddd;
+  border-radius:8px;
 }
 
 .auth-box button{
   width:100%;
-  padding:10px;
+  padding:12px;
+  margin-top:8px;
   background:#22c55e;
   border:none;
   color:#fff;
+  border-radius:8px;
   cursor:pointer;
 }
 
-/* DASHBOARD */
-#app{display:none;height:100vh}
+/* APP */
+#app{
+  display:none;
+  height:100vh;
+}
 
 .container{
   display:flex;
   height:100%;
 }
 
+/* SIDEBAR */
 .sidebar{
-  width:220px;
-  background:#111;
+  width:240px;
+  background:linear-gradient(180deg,#111,#1f2937);
   color:#fff;
   padding:20px;
 }
 
-.nav div{padding:10px;cursor:pointer}
-
-.main{
-  flex:1;
-  padding:20px;
+.sidebar h3{
+  margin-bottom:20px;
 }
 
+.nav div{
+  padding:12px;
+  border-radius:8px;
+  margin-bottom:6px;
+  cursor:pointer;
+}
+
+.nav div:hover{
+  background:#374151;
+}
+
+/* MAIN */
+.main{
+  flex:1;
+  padding:25px;
+  display:flex;
+  flex-direction:column;
+  gap:20px;
+  overflow:auto;
+}
+
+/* HEADER */
+.header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.header h2{
+  font-size:22px;
+}
+
+/* STATS */
 .stats{
   display:grid;
   grid-template-columns:repeat(4,1fr);
-  gap:10px;
+  gap:15px;
 }
 
 .card{
   background:#fff;
-  padding:15px;
-  border-radius:10px;
+  padding:18px;
+  border-radius:12px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.05);
 }
 
+.card h3{
+  margin-top:6px;
+}
+
+/* GRID */
 .grid{
   display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:15px;
-  margin-top:20px;
+  grid-template-columns:1fr 1.2fr;
+  gap:20px;
 }
 
-.leads,.chat{
+/* LEADS */
+.leads{
   background:#fff;
+  border-radius:12px;
   padding:15px;
-  border-radius:10px;
-  height:400px;
   overflow:auto;
 }
 
-.msg{margin:5px 0}
-.user{text-align:right}
+.lead{
+  padding:12px;
+  border-bottom:1px solid #eee;
+  cursor:pointer;
+}
+
+.lead:hover{
+  background:#f9fafb;
+}
+
+/* CHAT */
+.chat{
+  background:#fff;
+  border-radius:12px;
+  display:flex;
+  flex-direction:column;
+}
+
+#chat{
+  flex:1;
+  padding:15px;
+  overflow:auto;
+}
+
+.msg{
+  max-width:70%;
+  padding:10px;
+  margin:8px 0;
+  border-radius:10px;
+  font-size:14px;
+}
+
+.user{
+  background:#111;
+  color:#fff;
+  margin-left:auto;
+}
+
+.ai{
+  background:#f3f4f6;
+}
+
+/* INPUT */
+.chat-input{
+  display:flex;
+  border-top:1px solid #eee;
+}
+
+.chat-input input{
+  flex:1;
+  padding:12px;
+  border:none;
+  outline:none;
+}
+
+.chat-input button{
+  width:80px;
+  background:#22c55e;
+  color:#fff;
+  border:none;
+  cursor:pointer;
+}
 </style>
 </head>
 
 <body>
 
-<!-- AUTH SCREEN -->
+<!-- AUTH -->
 <div id="auth-screen">
   <div class="auth-box">
     <h3>Login</h3>
@@ -110,12 +217,13 @@ body{font-family:Inter;background:#f6f7fb}
   </div>
 </div>
 
-<!-- DASHBOARD -->
+<!-- APP -->
 <div id="app">
   <div class="container">
 
+    <!-- SIDEBAR -->
     <div class="sidebar">
-      <h3>PropBot</h3>
+      <h3>PropBot AI</h3>
       <div class="nav">
         <div>Dashboard</div>
         <div onclick="location.href='/properties'">Properties</div>
@@ -123,25 +231,36 @@ body{font-family:Inter;background:#f6f7fb}
       </div>
     </div>
 
+    <!-- MAIN -->
     <div class="main">
 
-      <h2>Dashboard</h2>
-
-      <div class="stats">
-        <div class="card">Leads <h3 id="total">0</h3></div>
-        <div class="card">Hot <h3 id="hot">0</h3></div>
-        <div class="card">Today <h3 id="today">0</h3></div>
-        <div class="card">Props <h3 id="props">0</h3></div>
+      <div class="header">
+        <h2>Dashboard</h2>
       </div>
 
+      <!-- STATS -->
+      <div class="stats">
+        <div class="card">Total Leads <h3 id="total">0</h3></div>
+        <div class="card">Hot Leads <h3 id="hot">0</h3></div>
+        <div class="card">Today <h3 id="today">0</h3></div>
+        <div class="card">Properties <h3 id="props">0</h3></div>
+      </div>
+
+      <!-- GRID -->
       <div class="grid">
+
+        <!-- LEADS -->
         <div class="leads" id="leads"></div>
 
+        <!-- CHAT -->
         <div class="chat">
           <div id="chat"></div>
-          <input id="msg" placeholder="Message">
-          <button onclick="sendMsg()">Send</button>
+          <div class="chat-input">
+            <input id="msg" placeholder="Type message...">
+            <button onclick="sendMsg()">Send</button>
+          </div>
         </div>
+
       </div>
 
     </div>
@@ -169,21 +288,22 @@ let user;
   }
 })();
 
-// AUTH UI SWITCH
+// UI SWITCH
 function showAuth(){
   document.getElementById("auth-screen").style.display="flex";
   document.getElementById("app").style.display="none";
 }
+
 function showApp(){
   document.getElementById("auth-screen").style.display="none";
   document.getElementById("app").style.display="block";
   loadData();
 }
 
-// LOGIN
+// AUTH
 async function login(){
-  const email=document.getElementById("email").value;
-  const password=document.getElementById("password").value;
+  const email=emailEl.value;
+  const password=passwordEl.value;
 
   const { data,error } = await db.auth.signInWithPassword({email,password});
   if(error) return alert(error.message);
@@ -192,18 +312,16 @@ async function login(){
   showApp();
 }
 
-// SIGNUP
 async function signup(){
-  const email=document.getElementById("email").value;
-  const password=document.getElementById("password").value;
+  const { error } = await db.auth.signUp({
+    email:emailEl.value,
+    password:passwordEl.value
+  });
 
-  const { error } = await db.auth.signUp({email,password});
   if(error) return alert(error.message);
-
   alert("Check email to confirm");
 }
 
-// LOGOUT
 async function logout(){
   await db.auth.signOut();
   showAuth();
@@ -219,7 +337,13 @@ async function loadLeads(){
   const { data } = await db.from("leads").select("*").eq("agent_id",user.id);
 
   document.getElementById("leads").innerHTML =
-    data.map(l=>`<div>${l.name||"Buyer"} - ₹${l.budget_max||""}</div>`).join("");
+    data.map(l=>`
+      <div class="lead">
+        <b>${l.name || 'Buyer'}</b><br>
+        ${l.bhk || ''} • ₹${l.budget_max || ''}<br>
+        <small>${l.location || ''}</small>
+      </div>
+    `).join("");
 
   document.getElementById("total").innerText=data.length;
   document.getElementById("hot").innerText=data.filter(l=>l.score==="hot").length;
@@ -234,18 +358,32 @@ async function loadProps(){
 // AI
 function extractIntent(t){
   t=t.toLowerCase();
-  return {
-    bhk: t.includes("2")?"2BHK":null,
-    budget_max: t.match(/\d+/)?.[0],
-    location: t.includes("nashik")?"nashik":null
-  }
+
+  let bhk=null;
+  if(t.includes("1")) bhk="1BHK";
+  if(t.includes("2")) bhk="2BHK";
+  if(t.includes("3")) bhk="3BHK";
+  if(t.includes("villa")) bhk="Villa";
+  if(t.includes("plot")) bhk="Plot";
+
+  let nums=t.match(/\d+/g);
+  let budget=nums?Math.max(...nums.map(Number)):null;
+
+  let location=null;
+  ["nashik","pune","mumbai","gangapur","ambad","satpur"].forEach(a=>{
+    if(t.includes(a)) location=a;
+  });
+
+  return {bhk,budget_max:budget,location};
 }
 
 async function getProps(f){
   let q=db.from("properties").select("*").eq("agent_id",user.id);
+
   if(f.bhk) q=q.eq("bhk",f.bhk);
   if(f.budget_max) q=q.lte("price",f.budget_max);
   if(f.location) q=q.ilike("location",`%${f.location}%`);
+
   const { data }=await q.limit(3);
   return data||[];
 }
@@ -267,9 +405,9 @@ async function sendMsg(){
   const intent=extractIntent(text);
   const props=await getProps(intent);
 
-  let reply="No match";
+  let reply="No matching properties 😕";
   if(props.length){
-    reply=props.map(p=>`${p.bhk} ₹${p.price}`).join("\n");
+    reply=props.map(p=>`🏠 ${p.bhk} • ₹${p.price}`).join("\n");
   }
 
   setTimeout(()=>addMsg(reply,"ai"),400);
@@ -277,7 +415,8 @@ async function sendMsg(){
   await db.from("leads").insert([{
     agent_id:user.id,
     bhk:intent.bhk,
-    budget_max:intent.budget_max
+    budget_max:intent.budget_max,
+    location:intent.location
   }]);
 
   loadLeads();
