@@ -125,6 +125,24 @@
   @keyframes sp{to{transform:rotate(360deg)}}
   @keyframes slideIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
   .newcard{animation:slideIn 0.3s ease;}
+  /* ===== FORM GRID ALIGNMENT ===== */
+.fg-row3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.8rem;
+}
+
+.fg-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.8rem;
+}
+
+/* Disabled field styling */
+select:disabled {
+  background: #f3f4f6;
+  cursor: not-allowed;
+}
 </style>
 </head>
 <body>
@@ -202,7 +220,7 @@
 
       <div class="fg-row3">
         <div class="fg">
-          <div class="fg">
+          //<div class="fg">
           <label>Property Type</label>
             <select id="f-type" onchange="handleTypeChange()">
               <option value="">Select</option>
@@ -211,16 +229,20 @@
               <option value="plot">Plot</option>
             </select>
           </div>
-          <label>BHK Type</label>
-          <select id="f-bhk">
-            <option value="">Select</option>
-            <option>1BHK</option><option>2BHK</option><option>3BHK</option><option>4BHK+</option>
-          </select>
-        </div>
-        <div class="fg">
-          <label>Price </label>
-          <input type="text" id="f-price" placeholder="48 (L) or 1.2 (Cr)">
-        </div>
+          <div class="fg">
+            <label>BHK Type</label>
+            <select id="f-bhk">
+              <option value="">Select</option>
+              <option>1BHK</option>
+              <option>2BHK</option>
+              <option>3BHK</option>
+              <option>4BHK+</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label>Price </label>
+            <input type="text" id="f-price" placeholder="48 (L) or 1.2 (Cr)">
+          </div>
         <!-- PLOT AREA -->
         <div class="fg" id="plot-area-box">
           <label>Area (acres)</label>
@@ -644,17 +666,17 @@ function normalizePrice(value) {
   const builtBox = document.getElementById("built-area-box");
 
   if (type === "plot") {
-    // Plot mode
+    // Disable BHK
     bhk.value = "";
     bhk.disabled = true;
-
+    // Show plot area
     plotBox.style.display = "block";
     builtBox.style.display = "none";
 
   } else if (type === "flat" || type === "villa") {
-    // Built property mode
+    // Enable BHK
     bhk.disabled = false;
-
+    // Show built area
     plotBox.style.display = "none";
     builtBox.style.display = "block";
   }
