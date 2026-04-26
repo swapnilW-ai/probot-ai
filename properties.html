@@ -218,52 +218,56 @@ select:disabled {
     <div class="modal-body">
       <div id="modal-msg" class="msg-bar"></div>
 
-      <div class="fg-row3">
-        <div class="fg">
-          //<div class="fg">
-          <label>Property Type</label>
-            <select id="f-type" onchange="handleTypeChange()">
-              <option value="">Select</option>
-              <option value="flat">Flat</option>
-              <option value="villa">Villa</option>
-              <option value="plot">Plot</option>
-            </select>
-          </div>
-          <div class="fg">
-            <label>BHK Type</label>
-            <select id="f-bhk">
-              <option value="">Select</option>
-              <option>1BHK</option>
-              <option>2BHK</option>
-              <option>3BHK</option>
-              <option>4BHK+</option>
-            </select>
-          </div>
-          <div class="fg">
-            <label>Price </label>
-            <input type="text" id="f-price" placeholder="48 (L) or 1.2 (Cr)">
-          </div>
-        <!-- PLOT AREA -->
-        <div class="fg" id="plot-area-box">
-          <label>Area (acres)</label>
-          <input type="number" id="f-area" placeholder="1.5">
-        </div>
+      <!-- TOP ROW -->
+<div class="fg-row3">
+  <div class="fg">
+    <label>Property Type</label>
+    <select id="f-type" onchange="handleTypeChange()">
+      <option value="">Select</option>
+      <option value="flat">Flat</option>
+      <option value="villa">Villa</option>
+      <option value="plot">Plot</option>
+    </select>
+  </div>
 
-        <!-- FLAT/VILLA AREA -->
-        <div id="built-area-box" style="display:none;">
-          <div class="fg-row">
-            <div class="fg">
-              <label>Carpet Area (sqft)</label>
-              <input type="number" id="f-carpet" placeholder="750">
-            </div>
-            <div class="fg">
-              <label>Super Built-up (sqft)</label>
-              <input type="number" id="f-super" placeholder="1050">
-            </div>
-          </div>
-        </div>
-      </div>
+  <div class="fg">
+    <label>BHK Type</label>
+    <select id="f-bhk">
+      <option value="">Select</option>
+      <option>1BHK</option>
+      <option>2BHK</option>
+      <option>3BHK</option>
+      <option>4BHK+</option>
+    </select>
+  </div>
 
+  <div class="fg">
+    <label>Price</label>
+    <input type="text" id="f-price" placeholder="48 (L) or 1.2 (Cr)">
+  </div>
+</div>
+
+<!-- AREA FULL WIDTH BELOW -->
+
+<!-- PLOT -->
+<div class="fg full-width" id="plot-area-box">
+  <label>Area (acres)</label>
+  <input type="number" id="f-area" placeholder="1.5">
+</div>
+
+<!-- FLAT/VILLA -->
+<div id="built-area-box" style="display:none;">
+  <div class="fg-row full-width">
+    <div class="fg">
+      <label>Carpet Area (sqft)</label>
+      <input type="number" id="f-carpet" placeholder="750">
+    </div>
+    <div class="fg">
+      <label>Super Built-up (sqft)</label>
+      <input type="number" id="f-super" placeholder="1050">
+    </div>
+  </div>
+</div>
       <div class="fg-row">
         <div class="fg">
           <label>Location / Area</label>
