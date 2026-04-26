@@ -214,7 +214,7 @@
           <label>BHK Type</label>
           <select id="f-bhk">
             <option value="">Select</option>
-            <option>1BHK</option><option>2BHK</option><option>3BHK</option><option>4BHK</option><option>Villa</option><option>Plot</option>
+            <option>1BHK</option><option>2BHK</option><option>3BHK</option><option>4BHK+</option><option>Villa</option><option>Plot</option>
           </select>
         </div>
         <div class="fg">
@@ -222,7 +222,7 @@
           <input type="number" id="f-price" placeholder="48.5">
         </div>
         <div class="fg">
-          <label>Area (sqft)</label>
+          <label id="area-label">Area (sqft)</label>
           <input type="number" id="f-area" placeholder="950">
         </div>
       </div>
@@ -463,6 +463,7 @@ function clearForm() {
 
 // ── SAVE PROPERTY ──
 async function saveProperty() {
+  const type       = document.getElementById('f-type').value; // ✅ ADD HERE
   const bhk        = document.getElementById('f-bhk').value;
   const price      = parseFloat(document.getElementById('f-price').value);
   const area       = parseInt(document.getElementById('f-area').value) || null;
@@ -490,6 +491,7 @@ async function saveProperty() {
 
   const payload = {
     agent_id: agentId,
+    type,
     bhk,
     price,
     area,
@@ -563,7 +565,20 @@ function showMsg(msg, type) {
   el.textContent = msg;
   el.className = `msg-bar ${type}`;
 }
+function handleTypeChange() {
+  const type = document.getElementById("f-type").value;
+  const bhk = document.getElementById("f-bhk");
+  const areaLabel = document.getElementById("area-label");
 
+  if (type === "plot") {
+    bhk.value = "";
+    bhk.disabled = true;
+    areaLabel.innerText = "Area (acres)";
+  } else {
+    bhk.disabled = false;
+    areaLabel.innerText = "Area (sqft)";
+  }
+}
 document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal(); });
 </script>
 </body>
