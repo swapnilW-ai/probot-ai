@@ -382,7 +382,7 @@ function renderProperties() {
           <span class="prop-bhk">${p.bhk || '?'}</span>
           <span class="prop-status ${p.status||'available'}">${statusLabel(p.status)}</span>
         </div>
-        <div class="prop-price">₹${p.price}L<sub> · ${p.area ? p.area+'sqft' : ''}</sub></div>
+        <div class="prop-price">₹${formatPrice(p.price)}<sub> · ${p.area ? p.area+'sqft' : ''}</sub></div>
         <div class="prop-location">📍 ${p.location}${p.city ? ', '+p.city : ''}</div>
         ${p.floor ? `<div class="prop-area">${p.floor}${p.facing ? ' · '+p.facing+' facing' : ''}</div>` : ''}
       </div>
@@ -585,6 +585,16 @@ function normalizePrice(value) {
   }
 
   return num;
+}
+  function formatPrice(price) {
+  if (!price) return "₹0";
+
+  if (price >= 100) {
+    let cr = (price / 100).toFixed(2).replace(/\.00$/, '');
+    return `₹${cr} Cr`;
+  }
+
+  return `₹${price} L`;
 }
   function showMsg(msg, type) {
   const el = document.getElementById('modal-msg');
