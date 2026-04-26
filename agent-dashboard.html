@@ -264,7 +264,7 @@ async function sendMsg(){
 
   let reply="No match";
   if(props.length){
-    reply=props.map(p=>`${p.bhk} ₹${p.price}`).join("\n");
+    reply=props.map(p=>`${p.bhk} ${formatPrice(p.price)}`).join("\n");
   }
 
   setTimeout(()=>addMsg(reply,"ai"),600);
