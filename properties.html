@@ -382,7 +382,7 @@ function renderProperties() {
           <span class="prop-bhk">${p.bhk || '?'}</span>
           <span class="prop-status ${p.status||'available'}">${statusLabel(p.status)}</span>
         </div>
-        <div class="prop-price">₹${formatPrice(p.price)}<sub> · ${p.area ? p.area+'sqft' : ''}</sub></div>
+        <div class="prop-price">${formatPrice(p.price)}<sub> · ${p.area ? p.area+'sqft' : ''}</sub></div>
         <div class="prop-location">📍 ${p.location}${p.city ? ', '+p.city : ''}</div>
         ${p.floor ? `<div class="prop-area">${p.floor}${p.facing ? ' · '+p.facing+' facing' : ''}</div>` : ''}
       </div>
