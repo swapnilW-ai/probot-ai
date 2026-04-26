@@ -202,7 +202,16 @@
 
       <div class="fg-row3">
         <div class="fg">
+          <div class="fg">
           <label>Property Type</label>
+            <select id="f-type" onchange="handleTypeChange()">
+              <option value="">Select</option>
+              <option value="flat">Flat</option>
+              <option value="villa">Villa</option>
+              <option value="plot">Plot</option>
+            </select>
+          </div>
+          <label>BHK Type</label>
           <select id="f-bhk">
             <option value="">Select</option>
             <option>1BHK</option><option>2BHK</option><option>3BHK</option><option>4BHK</option><option>Villa</option><option>Plot</option>
