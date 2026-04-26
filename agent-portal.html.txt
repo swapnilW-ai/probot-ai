@@ -284,11 +284,11 @@
   <div class="sidebar">
     <div class="sb-logo"><div class="sb-dot"></div>PropBot AI</div>
     <div class="sb-section">Main</div>
-    <div class="sb-item active" onclick="location.href='agent-portal.html'">⚡ Dashboard <span class="sb-badge" id="hot-badge">0</span></div>
+    <div class="sb-item active" onclick="location.href='/dashboard'">⚡ Dashboard <span class="sb-badge" id="hot-badge">0</span></div>
     <div class="sb-item">💬 Conversations</div>
     <div class="sb-item">👥 All Leads</div>
     <div class="sb-section">Manage</div>
-    <div class="sb-item" onclick="location.href='properties.html'">🏠 My Properties</div>
+    <div class="sb-item" onclick="location.href='/properties'">🏠 My Properties</div>
     <div class="sb-item">📅 Site Visits</div>
     <div class="sb-item">🔁 Follow-ups</div>
     <div class="sb-section">Account</div>
