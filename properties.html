@@ -745,6 +745,12 @@ window.clearForm = function() {
   await loadProperties();
 
 })();
+
+  (async function logout(){
+  await db.auth.signOut();
+  location.href="/"
+    );
+
 </script>
 
 </body>
