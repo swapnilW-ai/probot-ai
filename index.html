@@ -424,6 +424,10 @@
           <label>Email Address</label>
           <input type="email" id="f-email" placeholder="rahul@gmail.com">
         </div>
+        <div class="fg">
+          <label>Password</label>
+          <input type="password" id="f-password" placeholder="Create password">
+        </div>
         <div class="form-group">
           <label>City</label>
           <select id="f-city">
@@ -518,6 +522,10 @@ function validate() {
   if (!fname) { alert('Please enter your first name'); return false; }
   if (!phone || phone.length < 8) { alert('Please enter a valid phone number'); return false; }
   if (!email || !email.includes('@')) { alert('Please enter a valid email'); return false; }
+  const password = document.getElementById('f-password').value;
+  if (!password || password.length < 6) {
+  alert("Password must be at least 6 characters");
+  return false;}
   if (!city) { alert('Please select your city'); return false; }
   return true;
 }
@@ -547,8 +555,12 @@ async function handleSignup() {
 async function createUser(name, phone, email, city) {
   try {
     const { data, error } = await db.auth.signUp({
+      email: email
+      const password = document.getElementById('f-password').value;
+      const { data, error } = await db.auth.signUp({
       email: email,
-      password: phone
+      password: password
+});
     });
 
     if (error) throw error;
