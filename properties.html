@@ -746,10 +746,10 @@ window.clearForm = function() {
 
 })();
 
-  (async function logout(){
+  window.logout = async function() {
   await db.auth.signOut();
-  location.href="/"
-    );
+  location.href = "/portal"; // better redirect to login page
+};
 
 </script>
 
