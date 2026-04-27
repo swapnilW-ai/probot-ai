@@ -572,7 +572,7 @@ async function createUser(name, phone, email, city) {
 
     const expiry = getPlanExpiry(currentPlan);
 
-    await db.from('agents').insert([{
+    const { error: insertError }=await db.from('agents').insert([{
       id: userId,
       name,
       phone,
@@ -583,7 +583,10 @@ async function createUser(name, phone, email, city) {
       plan_expiry: expiry,
       trial_start: new Date().toISOString()
     }]);
-
+    if (insertError) {
+      console.error(" AGENT INSERT ERROR:", insertError);
+      alert(insertError.message);
+    }
     showSuccess(name, phone, email, city, currentPlan);
 
     // ✅ REDIRECT AFTER SUCCESS
