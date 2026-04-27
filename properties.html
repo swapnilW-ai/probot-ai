@@ -533,7 +533,7 @@ window.closeModal = function() {
 }
 
 window.handleOverlay = function(e) {
-  if (e.target === document.getElementById('modal')) closeModal();
+  if (e.target === document.getElementById('modal')) window.closeModal();
 }
 
 function clearForm() {
@@ -719,7 +719,7 @@ function normalizePrice(value) {
     builtBox.style.display = "block";
   }
 }
-document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal(); });
+document.addEventListener('keydown', e => { if(e.key==='Escape') window.closeModal(); });
 </script>
 <script>
 window.openModal = function(id = null) {
