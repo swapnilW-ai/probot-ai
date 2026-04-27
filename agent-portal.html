@@ -499,7 +499,7 @@ function clearMsg() {
 // ═══════════════════════════════════════════
 // SIGNUP
 // ═══════════════════════════════════════════
-async function handleSignup() {
+window.handleSignup = async function() {
   const fname = document.getElementById('s-fname').value.trim();
   const lname  = document.getElementById('s-lname').value.trim();
   const email  = document.getElementById('s-email').value.trim();
@@ -551,7 +551,7 @@ async function handleSignup() {
 // ═══════════════════════════════════════════
 // LOGIN
 // ═══════════════════════════════════════════
-async function handleLogin() {
+window.handleLogin = async function() {
   const email = document.getElementById('l-email').value.trim();
   const pass  = document.getElementById('l-pass').value;
 
