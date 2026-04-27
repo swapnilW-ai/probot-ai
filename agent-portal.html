@@ -568,7 +568,7 @@ async function handleLogout() {
   document.getElementById('sb-plan').textContent = `${currentAgent.plan?.toUpperCase()} · ${currentAgent.city}`;
   document.getElementById('topbar-date').textContent =
     new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'short'}) + ` · ${currentAgent.city}`;
-}
+
 
 // ═══════════════════════════════════════════
 // SHOW DASHBOARD
