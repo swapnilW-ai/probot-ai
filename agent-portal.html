@@ -450,7 +450,7 @@ document.getElementById('topbar-date').textContent =
       name: user.email.split('@')[0],
       plan: 'free',
       status: 'active',
-      trial_start: new Date().toISOString()
+      trial_start: new Date().toISOString(),
       plan_expiry: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() 
     }]);
 
@@ -773,18 +773,30 @@ function fallback(t) {
   return 'Namaste! 😊 Kaunsa BHK chahiye aur budget kya hai?';
 }
 
-document.getElementById('chat-in').addEventListener('keydown', e => {
-  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}
-});
-document.getElementById('chat-in').addEventListener('input', function(){
-  this.style.height='auto'; this.style.height=Math.min(this.scrollHeight,80)+'px';
-});
+//document.getElementById('chat-in').addEventListener('keydown', e => {
+//  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}
+//});
+//document.getElementById('chat-in').addEventListener('input', function(){
+//  this.style.height='auto'; this.style.height=Math.min(this.scrollHeight,80)+'px';
+//}
+const chatInput = document.getElementById('chat-in');
+
+if (chatInput) {
+  chatInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMsg();
+    }
+  });
+
+  chatInput.addEventListener('input', function () {
+    this.style.height = 'auto';
+    this.style.height = Math.min(this.scrollHeight, 80) + 'px';
+  });
+}    
+  );
 </script>
 <script>
-const db = supabase.createClient(
-  'https://zejcequtmrmetogbxudz.supabase.co',
-  'sb_publishable_MDKa6Y4VCUoVA_UeBdaQ8w_93qDws5E'
-);
 
 // ✅ LOGIN FUNCTION
 window.handleLogin = async function () {
