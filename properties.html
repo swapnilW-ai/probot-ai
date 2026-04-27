@@ -399,33 +399,38 @@ let properties = [];
 
 // ── LOAD PROPERTIES ──
 async function loadProperties() {
-  if (!currentAgent) return;
 
-  try {
-    const { data: { user } } = await db.auth.getUser();
+  const { data: { user } } = await db.auth.getUser();
 
-    const agentId = user.id; // ✅ always use this
+  if (!user) {
+    console.log("User not logged in");
+    return;
+  }
 
-    console.log("Fetching agentId:", agentId); // ✅ correct place
+  const agentId = user.id;
 
-    const { data, error } = await db
-      .from('properties')
-      .select('*')
-      .eq('agent_id', agentId)
-      .order('created_at', { ascending: false });
+  console.log("Fetching agentId:", agentId);
 
-    if (error) throw error;
+  const { data, error } = await db
+    .from('properties')
+    .select('*')
+    .eq('agent_id', agentId)
+    .order('created_at', { ascending: false });
 
-    console.log("RAW DATA:", data); // 🔥 important debug
-    console.log("IS ARRAY:", Array.isArray(data));
+  if (error) {
+    console.error("Load error:", error);
+    return;
+  }
 
-    //properties = data || [];
-    properties = Array.isArray(data) ? data : [];
-    console.log('Properties loaded:', properties.length);
+  console.log("RAW DATA:", data);
 
-    renderProperties();
-    updateStats();
+  properties = Array.isArray(data) ? data : [];
 
+  console.log("Properties loaded:", properties.length);
+
+  renderProperties();
+  updateStats();
+}
   } catch(e) {
     console.error('Load error:', e.message);
   }
