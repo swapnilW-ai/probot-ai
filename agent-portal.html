@@ -236,7 +236,6 @@
           <label for="l-pass">Password</label>
           <input type="password" id="l-pass" placeholder="Enter your password">
         </div>
-
         <button class="auth-btn green-btn" onclick="handleLogin()" id="login-btn"> Login to Dashboard</button>
       </div>
 
@@ -550,33 +549,6 @@ window.handleSignup = async function() {
   btn.textContent = 'Create Free Account';
 }
 
-// ═══════════════════════════════════════════
-// LOGIN
-// ═══════════════════════════════════════════
-window.handleLogin = async function() {
-  const email = document.getElementById('l-email').value.trim();
-  const pass  = document.getElementById('l-pass').value;
-
-  if (!email||!pass) return showMsg('Please enter email and password');
-
-  const btn = document.getElementById('login-btn');
-  btn.disabled = true;
-  btn.innerHTML = '<div class="spin"></div> Logging in...';
-
-  try {
-    const { data, error } = await db.auth.signInWithPassword({ email, password: pass });
-    if (error) throw error;
-
-    await loadAgentProfile(data.user);
-    showDashboard();
-
-  } catch(e) {
-    showMsg(e.message || 'Invalid email or password. If new account, please sign up first.');
-  }
-
-  btn.disabled = false;
-  btn.textContent = 'Login to Dashboard';
-}
 
 // ═══════════════════════════════════════════
 // LOGOUT
