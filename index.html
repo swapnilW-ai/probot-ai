@@ -465,6 +465,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
 // ── SUPABASE ──
 const SUPABASE_URL = 'https://zejcequtmrmetogbxudz.supabase.co';
@@ -524,58 +525,101 @@ function validate() {
 async function handleSignup() {
   if (!validate()) return;
 
-  const btn = document.getElementById('pay-btn');
-  btn.disabled = true;
-  btn.textContent = 'Processing...';
-
-  const name = document.getElementById('f-fname').value.trim() + ' ' + document.getElementById('f-lname').value.trim();
+  const fname = document.getElementById('f-fname').value.trim();
+  const lname = document.getElementById('f-lname').value.trim();
+  const name = fname + ' ' + lname;
   const phone = document.getElementById('f-phone').value.trim();
   const email = document.getElementById('f-email').value.trim();
   const city  = document.getElementById('f-city').value;
 
-  // Save agent signup to Supabase
-  try {
-    await fetch(`${SUPABASE_URL}/rest/v1/agents`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${SUPABASE_KEY}`,
-        'Prefer': 'return=minimal'
-      },
-      body: JSON.stringify({ name, phone, email, city, plan: currentPlan, status: 'trial', trial_start: new Date().toISOString() })
-    });
-  } catch(e) { /* continue even if table doesn't exist yet */ }
-
+  // 🔹 FREE PLAN → DIRECT SIGNUP
   if (currentPlan === 'free') {
-    showSuccess(name, phone, email, city, 'Starter — Free');
+    await createUser(name, phone, email, city);
     return;
   }
 
-  // PRO — trigger Razorpay if key is set
-  if (RAZORPAY_KEY === 'rzp_test_YOUR_KEY_HERE') {
-    // Demo mode — simulate success
-    setTimeout(() => showSuccess(name, phone, email, city, 'Pro Agent — ₹999/mo'), 800);
-    return;
+  // 🔹 PRO PLAN → RAZORPAY
+  if (currentPlan === 'pro') {
+    startPayment(name, phone, email, city);
   }
-
-  // Real Razorpay payment
-  const options = {
-    key: RAZORPAY_KEY,
-    amount: 0, // ₹0 today (trial)
-    currency: 'INR',
-    name: 'PropBot AI',
-    description: 'Pro Agent — 14 Day Free Trial',
-    prefill: { name, email, contact: phone },
-    theme: { color: '#25b36b' },
-    handler: function(response) {
-      showSuccess(name, phone, email, city, 'Pro Agent — ₹999/mo', response.razorpay_payment_id);
-    },
-    modal: { ondismiss: function() { btn.disabled = false; btn.textContent = '🚀 Start Free Trial'; } }
-  };
-  new Razorpay(options).open();
 }
 
+async function createUser(name, phone, email, city) {
+  try {
+    const { data, error } = await db.auth.signUp({
+      email: email,
+      password: phone
+    });
+
+    if (error) throw error;
+
+    const userId = data.user.id;
+
+    // ✅ NEW: calculate expiry
+    const expiry = getPlanExpiry(currentPlan);
+
+    await db.from('agents').insert([{
+      id: userId,
+      name,
+      phone,
+      email,
+      city,
+      plan: currentPlan,
+      status: 'active',
+      plan_expiry: expiry, // ✅ IMPORTANT
+      trial_start: new Date().toISOString()
+    }]);
+
+    showSuccess(name, phone, email, city, currentPlan);
+
+  } catch (err) {
+    alert(err.message);
+  }
+}
+
+function getPlanExpiry(plan) {
+  const now = new Date();
+
+  if (plan === "free") {
+    now.setDate(now.getDate() + 7); // 7 days
+  } else if (plan === "pro") {
+    now.setDate(now.getDate() + 30); // 30 days
+  }
+
+  return now.toISOString();
+}
+
+ 
+function startPayment(name, phone, email, city) {
+
+  const options = {
+    key: "rzp_test_YOUR_KEY", // 🔥 replace later
+    amount: 99900, // ₹999 in paise
+    currency: "INR",
+    name: "PropBot AI",
+    description: "Pro Subscription",
+
+    handler: async function (response) {
+      console.log("Payment Success:", response);
+
+      // ✅ Only now create user
+      await createUser(name, phone, email, city);
+    },
+
+    prefill: {
+      name: name,
+      email: email,
+      contact: phone
+    },
+
+    theme: {
+      color: "#22c55e"
+    }
+  };
+
+  const rzp = new Razorpay(options);
+  rzp.open();
+}
 function showSuccess(name, phone, email, city, plan, payId) {
   document.getElementById('signup-screen').style.display = 'none';
   const ss = document.getElementById('success-screen');
