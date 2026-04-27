@@ -525,17 +525,6 @@ window.openModal = function(id = null) {
   document.body.style.overflow = 'hidden';
 }
 
-window.closeModal = function() {
-  document.getElementById('modal').classList.remove('open');
-  document.body.style.overflow = '';
-  editingId = null;
-  clearForm();
-}
-
-window.handleOverlay = function(e) {
-  if (e.target === document.getElementById('modal')) window.closeModal();
-}
-
 function clearForm() {
   ['f-bhk','f-price','f-area','f-location','f-floor','f-amenities','f-desc','f-facing'].forEach(id => {
     const el = document.getElementById(id);
@@ -740,16 +729,15 @@ window.openModal = function(id = null) {
 <script>
 console.log("JS LOADED");
 
-window.openModal = function() {
-  alert("Modal working");
-};
-
 window.handleOverlay = function(e) {
-  alert("Overlay working");
+  if (e.target === document.getElementById('modal')) window.closeModal();
 };
 
 window.closeModal = function() {
-  alert("Close working");
+  document.getElementById('modal').classList.remove('open');
+  document.body.style.overflow = '';
+  editingId = null;
+  clearForm();
 };
 </script>
 
