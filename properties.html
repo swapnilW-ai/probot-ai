@@ -496,45 +496,6 @@ function updateStats() {
   document.getElementById('ps-value').textContent = formatPrice(cleanTotal);
 }
 
-// ── OPEN MODAL ──
-window.openModal = function(id = null) {
-  editingId = id;
-  clearForm();
-
-  if (id) {
-    const p = properties.find(x=>x.id===id);
-    if (p) {
-      document.getElementById('modal-title').textContent = 'Edit Property';
-      document.getElementById('f-bhk').value = p.bhk || '';
-      document.getElementById('f-price').value = p.price || '';
-      document.getElementById('f-area').value = p.area || '';
-      document.getElementById('f-location').value = p.location || '';
-      document.getElementById('f-city').value = p.city || '';
-      document.getElementById('f-floor').value = p.floor || '';
-      document.getElementById('f-status').value = p.status || 'available';
-      document.getElementById('f-amenities').value = p.amenities || '';
-      document.getElementById('f-desc').value = p.description || '';
-      document.getElementById('f-facing').value = p.facing || '';
-      document.getElementById('f-possession').value = p.possession || 'ready';
-    }
-  } else {
-    document.getElementById('modal-title').textContent = 'Add New Property';
-  }
-
-  document.getElementById('modal').classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-
-function clearForm() {
-  ['f-bhk','f-price','f-area','f-location','f-floor','f-amenities','f-desc','f-facing'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.value = '';
-  });
-  document.getElementById('f-status').value = 'available';
-  document.getElementById('f-possession').value = 'ready';
-  showMsg('', '');
-}
-
 // ── SAVE PROPERTY ──
 window.saveProperty = async function() {
     const bhk        = document.getElementById('f-bhk').value;
@@ -711,18 +672,33 @@ function normalizePrice(value) {
 document.addEventListener('keydown', e => { if(e.key==='Escape') window.closeModal(); });
 </script>
 <script>
+  
+// ── OPEN MODAL ──
 window.openModal = function(id = null) {
+  editingId = id;
+  clearForm();
 
-  console.log("Modal opening..."); // debug
-
-  const modal = document.getElementById('modal');
-
-  if (!modal) {
-    console.error("Modal not found");
-    return;
+  if (id) {
+    const p = properties.find(x=>x.id===id);
+    if (p) {
+      document.getElementById('modal-title').textContent = 'Edit Property';
+      document.getElementById('f-bhk').value = p.bhk || '';
+      document.getElementById('f-price').value = p.price || '';
+      document.getElementById('f-area').value = p.area || '';
+      document.getElementById('f-location').value = p.location || '';
+      document.getElementById('f-city').value = p.city || '';
+      document.getElementById('f-floor').value = p.floor || '';
+      document.getElementById('f-status').value = p.status || 'available';
+      document.getElementById('f-amenities').value = p.amenities || '';
+      document.getElementById('f-desc').value = p.description || '';
+      document.getElementById('f-facing').value = p.facing || '';
+      document.getElementById('f-possession').value = p.possession || 'ready';
+    }
+  } else {
+    document.getElementById('modal-title').textContent = 'Add New Property';
   }
 
-  modal.classList.add('open');
+  document.getElementById('modal').classList.add('open');
   document.body.style.overflow = 'hidden';
 };
 </script>
@@ -738,6 +714,18 @@ window.closeModal = function() {
   document.body.style.overflow = '';
   editingId = null;
   clearForm();
+};
+
+window.clearForm = function() {
+  ['f-bhk','f-price','f-area','f-location','f-floor','f-amenities','f-desc','f-facing'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+
+  document.getElementById('f-status').value = 'available';
+  document.getElementById('f-possession').value = 'ready';
+
+  showMsg('', '');
 };
 </script>
 
