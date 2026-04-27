@@ -418,16 +418,61 @@ let sessionReplies = 0;
 // INIT — Check if already logged in
 // ═══════════════════════════════════════════
 document.getElementById('topbar-date').textContent =
-  new Date().toLocaleDateString('en-IN', { weekday:'long', day:'numeric', month:'short', year:'numeric' });
+  new Date().toLocaleDateString('en-IN', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric'
+  });
 
 (async () => {
   const { data: { session } } = await db.auth.getSession();
-  if (session) {
-    await loadAgentProfile(session.user);
-    showDashboard();
-  }
-})();
 
+  if (!session) return;
+
+  const user = session.user;
+
+  // 1. TRY LOAD PROFILE
+  let { data: profile } = await db
+    .from('agents')
+    .select('*')
+    .eq('id', user.id)
+    .maybeSingle();
+
+  // 2. IF NOT FOUND → CREATE IT
+  if (!profile) {
+    console.warn(" Profile missing, creating...");
+
+    const { error } = await db.from('agents').insert([{
+      id: user.id,
+      email: user.email,
+      name: user.email.split('@')[0],
+      plan: 'free',
+      status: 'active',
+      trial_start: new Date().toISOString()
+    }]);
+
+    if (error) {
+      console.error(" Failed to create profile:", error);
+      alert("Account setup error. Please try again.");
+      return;
+    }
+
+    // reload profile after insert
+    const res = await db
+      .from('agents')
+      .select('*')
+      .eq('id', user.id)
+      .maybeSingle();
+
+    profile = res.data;
+  }
+
+  // 3. CONTINUE NORMAL FLOW
+  await loadAgentProfile(user);
+  showDashboard();
+
+})();
 // ═══════════════════════════════════════════
 // AUTH TAB SWITCH
 // ═══════════════════════════════════════════
