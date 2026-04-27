@@ -547,7 +547,7 @@ function clearForm() {
 }
 
 // ── SAVE PROPERTY ──
-async function saveProperty() {
+window.saveProperty = async function() {
     const bhk        = document.getElementById('f-bhk').value;
   const rawPrice = document.getElementById('f-price').value;
   const price = normalizePrice(rawPrice);
