@@ -573,13 +573,6 @@ async function handleLogout() {
 // ═══════════════════════════════════════════
 // SHOW DASHBOARD
 // ═══════════════════════════════════════════
-function showDashboard() {
-  document.getElementById('auth-screen').style.display = 'none';
-  document.getElementById('dashboard').classList.add('show');
-  loadLeads();
-  loadStats();
-  setPill('blue', '✓ Connected · Your Data Only');
-}
 
 function setPill(cls, txt) {
   const p = document.getElementById('db-pill');
@@ -806,7 +799,16 @@ window.loadAgentProfile = async function(user) {
   }
 }
 
- 
+// ═══════════════════════════════════════════
+// SHOW DASHBOARD
+// ═══════════════════════════════════════════
+window.showDashboard = function () {
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('dashboard').classList.add('show');
+  loadLeads();
+  loadStats();
+  setPill('blue', '✓ Connected · Your Data Only');
+} 
 
 // ✅ LOGIN FUNCTION
 window.handleLogin = async function () {
