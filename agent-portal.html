@@ -450,6 +450,7 @@ document.getElementById('topbar-date').textContent =
       plan: 'free',
       status: 'active',
       trial_start: new Date().toISOString()
+      plan_expiry: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() 
     }]);
 
     if (error) {
