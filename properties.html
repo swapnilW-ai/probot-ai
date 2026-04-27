@@ -421,7 +421,7 @@ let properties = [];
     console.error("Load error:", error);
     return;
   }
-  }
+  
   console.log("RAW DATA:", data);
 
   properties = Array.isArray(data) ? data : [];
@@ -430,7 +430,7 @@ let properties = [];
 
   renderProperties();
   updateStats();
-
+  }  
   
 
 // ── RENDER PROPERTIES ──
