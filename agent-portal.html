@@ -806,5 +806,36 @@ document.getElementById('chat-in').addEventListener('input', function(){
   this.style.height='auto'; this.style.height=Math.min(this.scrollHeight,80)+'px';
 });
 </script>
+<script>
+const db = supabase.createClient(
+  'https://zejcequtmrmetogbxudz.supabase.co',
+  'sb_publishable_MDKa6Y4VCUoVA_UeBdaQ8w_93qDws5E'
+);
+
+// ✅ LOGIN FUNCTION
+window.handleLogin = async function () {
+
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+
+  if (!email || !password) {
+    alert("Please enter email & password");
+    return;
+  }
+
+  const { data, error } = await db.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  // ✅ success
+  window.location.href = "/properties";  // uses your vercel route
+};
+</script>
 </body>
 </html>
