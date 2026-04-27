@@ -339,7 +339,7 @@ const db = createClient(
   'sb_publishable_MDKa6Y4VCUoVA_UeBdaQ8w_93qDws5E'
 );
 
-let currentAgent =  session.user;
+let currentAgent = null;
 let editingId = null;
 let properties = [];
 
@@ -725,8 +725,26 @@ window.clearForm = function() {
   document.getElementById('f-status').value = 'available';
   document.getElementById('f-possession').value = 'ready';
 
-  showMsg('', '');
+  showMsg('', '');  
 };
+
+  (async () => {
+
+  const { data: { session } } = await db.auth.getSession();
+
+  if (!session) {
+    console.log("No session, redirecting...");
+    window.location.href = "/portal";
+    return;
+  }
+
+  currentAgent = session.user;
+
+  console.log("Logged in:", currentAgent.id);
+
+  await loadProperties();
+
+})();
 </script>
 
 </body>
