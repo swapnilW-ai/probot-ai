@@ -561,22 +561,6 @@ async function handleLogout() {
   switchTab('login');
 }
 
-// ═══════════════════════════════════════════
-// LOAD AGENT PROFILE
-// ═══════════════════════════════════════════
-window.loadAgentProfile = async function(user) {
-  try {
-    const { data } = await db.from('agents').select('*').eq('id', user.id).single();
-    currentAgent = data || {
-      id: user.id,
-      name: user.user_metadata?.full_name || user.email,
-      city: user.user_metadata?.city || 'Nashik',
-      plan: 'trial'
-    };
-  } catch(e) {
-    currentAgent = { id: user.id, name: user.email, city: 'Nashik', plan: 'trial' };
-  }
-
   // Update sidebar
   const initials = currentAgent.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
   document.getElementById('sb-avatar').textContent = initials;
@@ -804,6 +788,24 @@ const db = createClient(
   'https://zejcequtmrmetogbxudz.supabase.co',
   'sb_publishable_MDKa6Y4VCUoVA_UeBdaQ8w_93qDws5E'
 ); 
+
+ // ═══════════════════════════════════════════
+// LOAD AGENT PROFILE
+// ═══════════════════════════════════════════
+window.loadAgentProfile = async function(user) {
+  try {
+    const { data } = await db.from('agents').select('*').eq('id', user.id).single();
+    currentAgent = data || {
+      id: user.id,
+      name: user.user_metadata?.full_name || user.email,
+      city: user.user_metadata?.city || 'Nashik',
+      plan: 'trial'
+    };
+  } catch(e) {
+    currentAgent = { id: user.id, name: user.email, city: 'Nashik', plan: 'trial' };
+  }
+
+ 
 
 // ✅ LOGIN FUNCTION
 window.handleLogin = async function () {
