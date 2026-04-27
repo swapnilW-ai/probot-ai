@@ -826,8 +826,10 @@ window.handleLogin = async function () {
     return;
   }
 
-  // ✅ success
-  window.location.href = "/portal";  // uses your vercel route
+  // ✅ success LOAD PROFILE SHOW PAGE DASHBOARD
+  await loadAgentProfile(data.user);
+  showDashboard();
+  //window.location.href = "/portal";  // uses your vercel route
 };
 </script>
 </body>
