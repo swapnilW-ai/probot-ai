@@ -737,5 +737,21 @@ window.openModal = function(id = null) {
   document.body.style.overflow = 'hidden';
 };
 </script>
+<script>
+console.log("JS LOADED");
+
+window.openModal = function() {
+  alert("Modal working");
+};
+
+window.handleOverlay = function(e) {
+  alert("Overlay working");
+};
+
+window.closeModal = function() {
+  alert("Close working");
+};
+</script>
+
 </body>
 </html>
