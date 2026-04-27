@@ -564,18 +564,6 @@ async function handleLogout() {
 // ═══════════════════════════════════════════
 // LOAD AGENT PROFILE
 // ═══════════════════════════════════════════
-async function loadAgentProfile(user) {
-  try {
-    const { data } = await db.from('agents').select('*').eq('id', user.id).single();
-    currentAgent = data || {
-      id: user.id,
-      name: user.user_metadata?.full_name || user.email,
-      city: user.user_metadata?.city || 'Nashik',
-      plan: 'trial'
-    };
-  } catch(e) {
-    currentAgent = { id: user.id, name: user.email, city: 'Nashik', plan: 'trial' };
-  }
 
   // Update sidebar
   const initials = currentAgent.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
@@ -826,6 +814,23 @@ window.handleLogin = async function () {
     return;
   }
 
+// ═══════════════════════════════════════════
+// LOAD AGENT PROFILE
+// ═══════════════════════════════════════════
+window.loadAgentProfile = async function(user) {
+  try {
+    const { data } = await db.from('agents').select('*').eq('id', user.id).single();
+    currentAgent = data || {
+      id: user.id,
+      name: user.user_metadata?.full_name || user.email,
+      city: user.user_metadata?.city || 'Nashik',
+      plan: 'trial'
+    };
+  } catch(e) {
+    currentAgent = { id: user.id, name: user.email, city: 'Nashik', plan: 'trial' };
+  }
+
+  
   // ✅ success LOAD PROFILE SHOW PAGE DASHBOARD
   await loadAgentProfile(data.user);
   showDashboard();
