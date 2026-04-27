@@ -344,25 +344,57 @@ let editingId = null;
 let properties = [];
 
 // ── INIT ──
+// ── INIT ──
 (async () => {
+
+  // ✅ 1. CHECK SESSION FIRST
   const { data: { session } } = await db.auth.getSession();
-  if (!session) { location.href = '/portal'; return; }
 
-  currentAgent = session.user;
-
-  // Load agent profile
-  const { data: profile } = await db.from('agents').select('*').eq('id', currentAgent.id).single();
-  if (profile) {
-    const initials = profile.name?.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase() || '?';
-    document.getElementById('sb-avatar').textContent = initials;
-    document.getElementById('sb-name').textContent = profile.name;
-    document.getElementById('sb-plan').textContent = `${profile.plan?.toUpperCase()} · ${profile.city}`;
-
-    // Pre-fill city in form
-    document.getElementById('f-city').value = profile.city || '';
+  if (!session) {
+    location.href = '/portal';
+    return;
   }
 
+  const currentAgent = session.user;
+
+  // ✅ 2. LOAD PROFILE
+  const { data: profile, error } = await db
+    .from('agents')
+    .select('*')
+    .eq('id', currentAgent.id)
+    .single();
+
+  if (error || !profile) {
+    alert("User profile not found");
+    location.href = '/portal';
+    return;
+  }
+
+  // ✅ 3. CHECK EXPIRY (NOW SAFE)
+  if (!profile.plan_expiry || new Date(profile.plan_expiry) < new Date()) {
+    alert("Your plan has expired. Please renew.");
+    location.href = "/portal";
+    return;
+  }
+
+  // ✅ 4. SET UI
+  const initials = profile.name?.split(' ')
+    .map(n => n[0])
+    .join('')
+    .slice(0,2)
+    .toUpperCase() || '?';
+
+  document.getElementById('sb-avatar').textContent = initials;
+  document.getElementById('sb-name').textContent = profile.name;
+  document.getElementById('sb-plan').textContent =
+    `${profile.plan?.toUpperCase()} · ${profile.city}`;
+
+  // Prefill
+  document.getElementById('f-city').value = profile.city || '';
+
+  // ✅ 5. LOAD DATA
   await loadProperties();
+
 })();
 
 // ── LOAD PROPERTIES ──
