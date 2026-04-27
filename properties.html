@@ -339,7 +339,7 @@ const db = createClient(
   'sb_publishable_MDKa6Y4VCUoVA_UeBdaQ8w_93qDws5E'
 );
 
-let currentAgent = null;
+let currentAgent =  session.user;
 let editingId = null;
 let properties = [];
 
@@ -398,7 +398,7 @@ let properties = [];
 })();
 
 // ── LOAD PROPERTIES ──
-async function loadProperties() {
+  async function loadProperties() {
 
   const { data: { user } } = await db.auth.getUser();
 
@@ -421,7 +421,7 @@ async function loadProperties() {
     console.error("Load error:", error);
     return;
   }
-
+  }
   console.log("RAW DATA:", data);
 
   properties = Array.isArray(data) ? data : [];
