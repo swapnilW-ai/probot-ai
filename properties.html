@@ -431,10 +431,7 @@ async function loadProperties() {
   renderProperties();
   updateStats();
 }
-  } catch(e) {
-    console.error('Load error:', e.message);
-  }
-}
+  
 
 // ── RENDER PROPERTIES ──
 function renderProperties() {
@@ -500,7 +497,7 @@ function updateStats() {
 }
 
 // ── OPEN MODAL ──
-window.function openModal(id = null) {
+window.openModal = function(id = null) {
   editingId = id;
   clearForm();
 
