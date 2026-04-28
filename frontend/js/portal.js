@@ -10,6 +10,18 @@ let currentAgent = null;
 let convHistory = [];
 let sessionReplies = 0;
 
+window.loadAgentProfile = async function(user) {
+
+  let { data: profile } = await db
+    .from('agents')
+    .select('*')
+    .eq('id', user.id)
+    .maybeSingle();
+
+  currentAgent = profile;
+
+};
+
 // ═══════════════════════════════════════════
 // INIT — Check if already logged in
 // ═══════════════════════════════════════════
