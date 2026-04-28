@@ -157,13 +157,24 @@ async function handleLogout() {
 }
 
   // Update sidebar
-  const initials = currentAgent.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+  // Update sidebar (SAFE)
+if (currentAgent) {
+  const initials = currentAgent.name.split(' ')
+    .map(n=>n[0])
+    .join('')
+    .slice(0,2)
+    .toUpperCase();
+
   document.getElementById('sb-avatar').textContent = initials;
   document.getElementById('sb-name').textContent = currentAgent.name;
-  document.getElementById('sb-plan').textContent = `${currentAgent.plan?.toUpperCase()} · ${currentAgent.city}`;
-  document.getElementById('topbar-date').textContent =
-    new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'short'}) + ` · ${currentAgent.city}`;
+  document.getElementById('sb-plan').textContent =
+    `${currentAgent.plan?.toUpperCase()} · ${currentAgent.city}`;
 
+  document.getElementById('topbar-date').textContent =
+    new Date().toLocaleDateString('en-IN',{
+      weekday:'long',day:'numeric',month:'short'
+    }) + ` · ${currentAgent.city}`;
+}
 
 // ═══════════════════════════════════════════
 // SHOW DASHBOARD
