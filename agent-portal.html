@@ -830,14 +830,29 @@ window.handleLogin = async function () {
     alert(error.message);
     return;
   }
-
-
   
   // ✅ success LOAD PROFILE SHOW PAGE DASHBOARD
   await loadAgentProfile(data.user);
   showDashboard();
-  //window.location.href = "/portal";  // uses your vercel route
+    
 };
+  
+// navigate property to portal
+ window.addEventListener('load', async () => {
+
+  const { data: { session } } = await db.auth.getSession();
+
+  if (!session) {
+    console.log("No session → stay on login");
+    return;
+  }
+
+  console.log("Session found → loading dashboard");
+
+  await loadAgentProfile(session.user);
+  showDashboard();
+
+}); 
 </script>
 </body>
 </html>
