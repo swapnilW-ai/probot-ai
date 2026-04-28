@@ -113,6 +113,43 @@ function clearMsg() {
 }
 
 // ═══════════════════════════════════════════
+// LOGIN
+// ═══════════════════════════════════════════
+window.handleLogin = async function() {
+
+  const email = document.getElementById('l-email').value.trim();
+  const pass  = document.getElementById('l-pass').value;
+
+  if (!email || !pass) {
+    showMsg('Enter email & password');
+    return;
+  }
+
+  const btn = document.getElementById('login-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spin"></div> Logging in...';
+
+  try {
+    const { data, error } = await db.auth.signInWithPassword({
+      email,
+      password: pass
+    });
+
+    if (error) throw error;
+
+    // load profile + dashboard
+    await loadAgentProfile(data.user);
+    showDashboard();
+
+  } catch (e) {
+    showMsg(e.message);
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Login to Dashboard';
+};
+
+// ═══════════════════════════════════════════
 // SIGNUP
 // ═══════════════════════════════════════════
 window.handleSignup = async function() {
