@@ -1,9 +1,3 @@
-// ───────── SUPABASE ─────────
-const SUPABASE_URL = 'https://zejcequtmrmetogbxudz.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_MDKa6Y4VCUoVA_UeBdaQ8w_93qDws5E';
-
-const { createClient } = supabase;
-const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ───────── RAZORPAY ─────────
 const RAZORPAY_KEY = 'rzp_live_SiRzzkBb3FKaQQ';
