@@ -3,56 +3,752 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>My Properties — PropBot AI</title>
-
-<link rel="stylesheet" href="/frontend/styles/properties.css">
-
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-</head>
+<style>
+  :root {
+    --bg:#f8f6f1;--black:#111;--white:#fff;
+    --green:#16a34a;--green-light:#22c55e;--green-pale:#dcfce7;
+    --amber:#d97706;--amber-pale:#fef3c7;
+    --red:#dc2626;--red-pale:#fee2e2;
+    --blue:#2563eb;--blue-pale:#dbeafe;
+    --border:#e5e0d8;--shadow:0 1px 4px rgba(0,0,0,0.07);
+    --mono:'JetBrains Mono',monospace;--sans:'Space Grotesk',sans-serif;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--black);}
+  body{display:flex;height:100vh;overflow:hidden;}
 
+  /* SIDEBAR */
+  .sidebar{width:230px;background:var(--black);display:flex;flex-direction:column;flex-shrink:0;}
+  .sb-logo{padding:1.5rem 1.2rem;font-weight:700;font-size:0.9rem;color:#fff;display:flex;align-items:center;gap:0.5rem;border-bottom:1px solid rgba(255,255,255,0.06);}
+  .sb-dot{width:8px;height:8px;background:var(--green-light);border-radius:50%;box-shadow:0 0 8px var(--green-light);animation:pulse 2s infinite;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+  .sb-section{padding:1rem 0.8rem 0.3rem;font-size:0.6rem;font-family:var(--mono);color:rgba(255,255,255,0.25);letter-spacing:2px;text-transform:uppercase;}
+  .sb-item{display:flex;align-items:center;gap:0.7rem;padding:0.6rem 1rem;margin:0.1rem 0.5rem;border-radius:8px;font-size:0.82rem;color:rgba(255,255,255,0.5);cursor:pointer;transition:all 0.15s;font-weight:500;text-decoration:none;}
+  .sb-item:hover{background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.85);}
+  .sb-item.active{background:rgba(34,197,94,0.15);color:var(--green-light);}
+  .sb-bottom{margin-top:auto;padding:1rem;border-top:1px solid rgba(255,255,255,0.06);}
+  .sb-agent{display:flex;align-items:center;gap:0.7rem;padding:0.5rem;}
+  .sb-avatar{width:34px;height:34px;background:var(--green);border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;color:#fff;flex-shrink:0;}
+  .sb-name{font-size:0.8rem;font-weight:600;color:rgba(255,255,255,0.85);}
+  .sb-plan{font-size:0.65rem;color:var(--green-light);font-family:var(--mono);}
+
+  /* MAIN */
+  .main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+  .topbar{background:var(--bg);border-bottom:1px solid var(--border);padding:0.9rem 2rem;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+  .page-title{font-size:1rem;font-weight:700;letter-spacing:-0.3px;}
+  .page-sub{font-size:0.72rem;color:#999;font-family:var(--mono);margin-top:1px;}
+  .add-btn{display:flex;align-items:center;gap:0.5rem;background:var(--black);color:#fff;font-family:var(--sans);font-weight:600;font-size:0.85rem;padding:0.6rem 1.2rem;border-radius:10px;border:none;cursor:pointer;transition:all 0.2s;}
+  .add-btn:hover{background:#222;transform:translateY(-1px);}
+
+  .content{flex:1;overflow-y:auto;padding:1.5rem 2rem;}
+
+  /* STATS */
+  .prop-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem;}
+  .ps-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:1rem 1.2rem;box-shadow:var(--shadow);}
+  .ps-num{font-family:var(--mono);font-size:1.8rem;font-weight:700;color:var(--black);line-height:1;}
+  .ps-label{font-size:0.7rem;color:#999;font-family:var(--mono);margin-top:0.3rem;text-transform:uppercase;letter-spacing:0.5px;}
+
+  /* PROPERTY GRID */
+  .prop-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.2rem;}
+
+  .prop-card{background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);transition:all 0.2s;position:relative;}
+  .prop-card:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,0.1);}
+
+  .prop-card-top{padding:1.2rem 1.2rem 0.8rem;border-bottom:1px solid var(--border);}
+  .prop-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.8rem;}
+  .prop-bhk{font-family:var(--mono);font-size:0.75rem;font-weight:600;background:var(--black);color:#fff;padding:0.25rem 0.6rem;border-radius:6px;}
+  .prop-status{font-size:0.68rem;font-weight:600;padding:0.2rem 0.55rem;border-radius:5px;font-family:var(--mono);}
+  .prop-status.available{background:var(--green-pale);color:var(--green);}
+  .prop-status.sold{background:var(--red-pale);color:var(--red);}
+  .prop-status.hold{background:var(--amber-pale);color:var(--amber);}
+
+  .prop-price{font-family:var(--mono);font-size:1.6rem;font-weight:700;color:var(--green);margin-bottom:0.2rem;}
+  .prop-price sub{font-size:0.75rem;color:#999;font-weight:400;}
+  .prop-location{font-size:0.85rem;color:#555;font-weight:500;margin-bottom:0.3rem;}
+  .prop-area{font-size:0.75rem;color:#999;font-family:var(--mono);}
+
+  .prop-card-body{padding:0.8rem 1.2rem;}
+  .prop-tags{display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:0.8rem;}
+  .prop-tag{font-size:0.68rem;background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:0.2rem 0.5rem;color:#666;font-family:var(--mono);}
+  .prop-desc{font-size:0.78rem;color:#777;line-height:1.5;}
+
+  .prop-card-foot{padding:0.7rem 1.2rem;border-top:1px solid var(--border);display:flex;gap:0.5rem;}
+  .prop-action{flex:1;padding:0.45rem;border-radius:7px;font-size:0.72rem;font-family:var(--mono);font-weight:600;border:1px solid var(--border);background:#fff;cursor:pointer;transition:all 0.15s;text-align:center;}
+  .prop-action:hover{background:var(--black);color:#fff;border-color:var(--black);}
+  .prop-action.delete:hover{background:var(--red);border-color:var(--red);}
+
+  /* AI BADGE */
+  .ai-badge{position:absolute;top:0.7rem;right:0.7rem;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.2);border-radius:5px;font-size:0.6rem;color:var(--green);font-family:var(--mono);font-weight:600;padding:0.15rem 0.4rem;}
+
+  /* EMPTY STATE */
+  .empty-state{text-align:center;padding:4rem 2rem;color:#aaa;}
+  .empty-icon{font-size:3rem;margin-bottom:1rem;}
+  .empty-title{font-size:1rem;font-weight:600;color:#777;margin-bottom:0.5rem;}
+  .empty-sub{font-size:0.83rem;color:#aaa;margin-bottom:1.5rem;line-height:1.6;}
+
+  /* MODAL */
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(6px);z-index:100;display:none;place-items:center;padding:1rem;}
+  .modal-overlay.open{display:grid;}
+  .modal{background:#fff;border-radius:20px;width:100%;max-width:520px;overflow:hidden;animation:modalIn 0.25s ease;box-shadow:0 20px 60px rgba(0,0,0,0.2);}
+  @keyframes modalIn{from{opacity:0;transform:scale(0.96)translateY(8px)}to{opacity:1;transform:scale(1)translateY(0)}}
+  .modal-hdr{padding:1.5rem 1.8rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+  .modal-title{font-size:1.1rem;font-weight:700;letter-spacing:-0.3px;}
+  .modal-close{background:none;border:none;font-size:1.3rem;cursor:pointer;color:#aaa;transition:color 0.15s;line-height:1;}
+  .modal-close:hover{color:var(--black);}
+  .modal-body{padding:1.5rem 1.8rem;}
+  .modal-foot{padding:1rem 1.8rem;border-top:1px solid var(--border);display:flex;gap:0.8rem;justify-content:flex-end;}
+
+  .fg{margin-bottom:1rem;}
+  .fg label{display:block;font-size:0.72rem;font-weight:600;color:#666;margin-bottom:0.3rem;text-transform:uppercase;letter-spacing:0.3px;}
+  .fg input,.fg select,.fg textarea{width:100%;padding:0.7rem 0.9rem;border:1.5px solid var(--border);border-radius:9px;font-size:0.85rem;font-family:var(--sans);background:#fff;color:var(--black);outline:none;transition:border-color 0.2s;}
+  .fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--green-light);}
+  .fg textarea{resize:vertical;min-height:70px;}
+  .fg-row{display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;}
+  .fg-row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.8rem;}
+
+  .modal-btn{padding:0.7rem 1.5rem;border-radius:9px;font-family:var(--sans);font-weight:700;font-size:0.88rem;cursor:pointer;border:none;transition:all 0.2s;}
+  .modal-btn.cancel{background:var(--bg);color:#666;border:1px solid var(--border);}
+  .modal-btn.cancel:hover{background:#eee;}
+  .modal-btn.save{background:var(--green);color:#fff;}
+  .modal-btn.save:hover{background:#15803d;}
+  .modal-btn:disabled{background:#ccc;cursor:not-allowed;}
+
+  .msg-bar{padding:0.6rem 0.9rem;border-radius:8px;font-size:0.8rem;margin-bottom:0.8rem;display:none;}
+  .msg-bar.error{background:var(--red-pale);color:var(--red);display:block;}
+  .msg-bar.success{background:var(--green-pale);color:var(--green);display:block;}
+
+  ::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.1);border-radius:4px;}
+  .spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:sp 0.7s linear infinite;}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  @keyframes slideIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+  .newcard{animation:slideIn 0.3s ease;}
+  /* ===== FORM GRID ALIGNMENT ===== */
+.fg-row3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.8rem;
+}
+
+.fg-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.8rem;
+}
+
+/* Disabled field styling */
+select:disabled {
+  background: #f3f4f6;
+  cursor: not-allowed;
+}
+</style>
+</head>
 <body>
 
 <!-- SIDEBAR -->
 <div class="sidebar">
-  <div class="sb-logo">PropBot AI</div>
-
-  <div class="sb-item" onclick="location.href='/frontend/pages/agent-dashboard.html'">Dashboard</div>
-  <div class="sb-item active">My Properties</div>
-  <div class="sb-item">Site Visits</div>
-  <div class="sb-item">Followups</div>
-
-  <div class="sb-item" onclick="logout()">Logout</div>
-
+  <div class="sb-logo"><div class="sb-dot"></div>PropBot AI</div>
+  <div class="sb-section">Main</div>
+  <div class="sb-item" onclick="location.href='/portal'">⚡ Dashboard</div>
+  <div class="sb-item" onclick="location.href='/dashboard'">💬 Conversations</div>
+  <div class="sb-item" onclick="location.href='/dashboard'">👥 All Leads</div>
+  <div class="sb-section">Manage</div>
+  <div class="sb-item active">🏠 My Properties</div>
+  <div class="sb-item">📅 Site Visits</div>
+  <div class="sb-item">🔁 Follow-ups</div>
+  <div class="sb-section">Account</div>
+  <div class="sb-item">⚙️ Settings</div>
+  <div class="sb-item">💳 Billing</div>
+  <div class="sb-item" onclick="logout()">🚪 Logout</div>
   <div class="sb-bottom">
-    <div id="sb-avatar">?</div>
-    <div id="sb-name">Loading...</div>
-    <div id="sb-plan"></div>
+    <div class="sb-agent">
+      <div class="sb-avatar" id="sb-avatar">?</div>
+      <div>
+        <div class="sb-name" id="sb-name">Loading...</div>
+        <div class="sb-plan" id="sb-plan">PRO</div>
+      </div>
+    </div>
   </div>
 </div>
 
 <!-- MAIN -->
 <div class="main">
   <div class="topbar">
-    <h2>My Properties</h2>
-    <button onclick="openModal()">+ Add</button>
+    <div>
+      <div class="page-title">🏠 My Properties</div>
+      <div class="page-sub">Your listings — AI uses these to reply to buyers</div>
+    </div>
+    <button class="add-btn" onclick="openModal()">+ Add Property</button>
   </div>
 
-  <div id="prop-grid"></div>
+  <div class="content">
+
+    <!-- STATS -->
+    <div class="prop-stats">
+      <div class="ps-card"><div class="ps-num" id="ps-total">0</div><div class="ps-label">Total Listings</div></div>
+      <div class="ps-card"><div class="ps-num" id="ps-available" style="color:var(--green)">0</div><div class="ps-label">Available</div></div>
+      <div class="ps-card"><div class="ps-num" id="ps-sold" style="color:var(--red)">0</div><div class="ps-label">Sold / Closed</div></div>
+      <div class="ps-card"><div class="ps-num" id="ps-value" style="color:var(--amber)">₹0L</div><div class="ps-label">Total Portfolio</div></div>
+    </div>
+
+    <!-- PROPERTY GRID -->
+    <div class="prop-grid" id="prop-grid">
+      <div style="grid-column:1/-1">
+        <div class="empty-state">
+          <div class="empty-icon">🏗️</div>
+          <div class="empty-title">No properties yet</div>
+          <div class="empty-sub">Add your listings here. Your AI agent will use them to<br>suggest the right property to every buyer automatically.</div>
+          <button class="add-btn" style="margin:0 auto;" onclick="openModal()">+ Add First Property</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
 </div>
 
-<!-- MODAL -->
-<div id="modal" class="modal">
-  <input id="f-type" placeholder="type">
-  <input id="f-bhk" placeholder="bhk">
-  <input id="f-price" placeholder="price">
-  <input id="f-location" placeholder="location">
-  <button onclick="saveProperty()">Save</button>
+<!-- ADD PROPERTY MODAL -->
+<div class="modal-overlay" id="modal" onclick="handleOverlay(event)">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title" id="modal-title">Add New Property</div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="modal-msg" class="msg-bar"></div>
+
+      <!-- TOP ROW -->
+<div class="fg-row3">
+  <div class="fg">
+    <label>Property Type</label>
+    <select id="f-type" onchange="handleTypeChange()">
+      <option value="">Select</option>
+      <option value="flat">Flat</option>
+      <option value="villa">Villa</option>
+      <option value="plot">Plot</option>
+    </select>
+  </div>
+
+  <div class="fg">
+    <label>BHK Type</label>
+    <select id="f-bhk">
+      <option value="">Select</option>
+      <option>1BHK</option>
+      <option>2BHK</option>
+      <option>3BHK</option>
+      <option>4BHK+</option>
+    </select>
+  </div>
+
+  <div class="fg">
+    <label>Price</label>
+    <input type="text" id="f-price" placeholder="48 (L) or 1.2 (Cr)">
+  </div>
 </div>
 
-<!-- JS -->
-<script src="/frontend/js/app.js"></script>
-<script src="/frontend/js/properties.js"></script>
+<!-- AREA FULL WIDTH BELOW -->
+
+<!-- PLOT -->
+<div class="fg full-width" id="plot-area-box">
+  <label>Area (acres)</label>
+  <input type="number" id="f-area" placeholder="1.5">
+</div>
+
+<!-- FLAT/VILLA -->
+<div id="built-area-box" style="display:none;">
+  <div class="fg-row full-width">
+    <div class="fg">
+      <label>Carpet Area (sqft)</label>
+      <input type="number" id="f-carpet" placeholder="750">
+    </div>
+    <div class="fg">
+      <label>Super Built-up (sqft)</label>
+      <input type="number" id="f-super" placeholder="1050">
+    </div>
+  </div>
+</div>
+      <div class="fg-row">
+        <div class="fg">
+          <label>Location / Area</label>
+          <input type="text" id="f-location" placeholder="Gangapur Road">
+        </div>
+        <div class="fg">
+          <label>City</label>
+          <input type="text" id="f-city" placeholder="Nashik">
+        </div>
+      </div>
+
+      <div class="fg-row">
+        <div class="fg">
+          <label>Floor</label>
+          <input type="text" id="f-floor" placeholder="2nd Floor">
+        </div>
+        <div class="fg">
+          <label>Status</label>
+          <select id="f-status">
+            <option value="available">Available</option>
+            <option value="hold">On Hold</option>
+            <option value="sold">Sold</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="fg">
+        <label>Amenities / Tags</label>
+        <input type="text" id="f-amenities" placeholder="Parking, Lift, Gym, Pool, Near Temple (comma separated)">
+      </div>
+
+      <div class="fg">
+        <label>Description (AI uses this to describe to buyers)</label>
+        <textarea id="f-desc" placeholder="Beautiful 2BHK on Gangapur Road with excellent connectivity. Society with 24hr security. Ready to move."></textarea>
+      </div>
+
+      <div class="fg-row">
+        <div class="fg">
+          <label>Facing</label>
+          <select id="f-facing">
+            <option value="">Any</option>
+            <option>East</option><option>West</option><option>North</option><option>South</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Possession</label>
+          <select id="f-possession">
+            <option value="ready">Ready to Move</option>
+            <option value="under">Under Construction</option>
+            <option value="6months">6 Months</option>
+            <option value="1year">1 Year</option>
+          </select>
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-foot">
+      <button class="modal-btn cancel" onclick="closeModal()">Cancel</button>
+      <button class="modal-btn save" id="save-btn" onclick="saveProperty()">Save Property</button>
+    </div>
+  </div>
+</div>
+
+<script>
+
+
+let currentAgent = null;
+let editingId = null;
+let properties = [];
+
+// ── INIT ──
+// ── INIT ──
+(async () => {
+
+  // ✅ 1. CHECK SESSION FIRST
+  const { data: { session } } = await db.auth.getSession();
+
+  if (!session) {
+    location.href = '/portal';
+    return;
+  }
+
+  const currentAgent = session.user;
+
+  // ✅ 2. LOAD PROFILE
+  const { data: profile, error } = await db
+    .from('agents')
+    .select('*')
+    .eq('id', currentAgent.id)
+    .single();
+
+  if (error || !profile) {
+    alert("User profile not found");
+    location.href = '/portal';
+    return;
+  }
+
+  // ✅ 3. CHECK EXPIRY (NOW SAFE)
+  if (!profile.plan_expiry || new Date(profile.plan_expiry) < new Date()) {
+    alert("Your plan has expired. Please renew.");
+    location.href = "/portal";
+    return;
+  }
+
+  // ✅ 4. SET UI
+  const initials = profile.name?.split(' ')
+    .map(n => n[0])
+    .join('')
+    .slice(0,2)
+    .toUpperCase() || '?';
+
+  document.getElementById('sb-avatar').textContent = initials;
+  document.getElementById('sb-name').textContent = profile.name;
+  document.getElementById('sb-plan').textContent =
+    `${profile.plan?.toUpperCase()} · ${profile.city}`;
+
+  // Prefill
+  document.getElementById('f-city').value = profile.city || '';
+
+  // ✅ 5. LOAD DATA
+  await loadProperties();
+
+})();
+
+// ── LOAD PROPERTIES ──
+  async function loadProperties() {
+
+  const { data: { user } } = await db.auth.getUser();
+
+  if (!user) {
+    console.log("User not logged in");
+    return;
+  }
+
+  const agentId = user.id;
+
+  console.log("Fetching agentId:", agentId);
+
+  const { data, error } = await db
+    .from('properties')
+    .select('*')
+    .eq('agent_id', agentId)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error("Load error:", error);
+    return;
+  }
+  
+  console.log("RAW DATA:", data);
+
+  properties = Array.isArray(data) ? data : [];
+
+  console.log("Properties loaded:", properties.length);
+
+  renderProperties();
+  updateStats();
+  }  
+  
+
+// ── RENDER PROPERTIES ──
+function renderProperties() {
+  const grid = document.getElementById('prop-grid');
+
+  if (!properties.length) {
+    grid.innerHTML = `<div style="grid-column:1/-1">
+      <div class="empty-state">
+        <div class="empty-icon">🏗️</div>
+        <div class="empty-title">No properties yet</div>
+        <div class="empty-sub">Add your listings here. Your AI agent will use them to<br>suggest the right property to every buyer automatically.</div>
+        <button class="add-btn" style="margin:0 auto;" onclick="openModal()">+ Add First Property</button>
+      </div>
+    </div>`;
+    return;
+  }
+
+  grid.innerHTML = properties.map(p => `
+    <div class="prop-card newcard">
+      <div class="ai-badge">⚡ AI Active</div>
+      <div class="prop-card-top">
+        <div class="prop-header">
+          <span class="prop-bhk">${p.bhk || '?'}</span>
+          <span class="prop-status ${p.status||'available'}">${statusLabel(p.status)}</span>
+        </div>
+        <div class="prop-price">${formatPrice(p.price)}<sub> · ${p.type === 'plot'
+          ? (p.area ? p.area + ' acres' : '')
+          : (p.carpet_area
+              ? p.carpet_area + ' sqft (carpet)'
+              : '') +
+            (p.super_area
+              ? ' · ' + p.super_area + ' sqft (super)'
+              : '')
+}</sub></div>
+        <div class="prop-location">📍 ${p.location}${p.city ? ', '+p.city : ''}</div>
+        ${p.floor ? `<div class="prop-area">${p.floor}${p.facing ? ' · '+p.facing+' facing' : ''}</div>` : ''}
+      </div>
+      <div class="prop-card-body">
+        ${p.amenities ? `<div class="prop-tags">${p.amenities.split(',').map(a=>`<span class="prop-tag">${a.trim()}</span>`).join('')}</div>` : ''}
+        ${p.description ? `<div class="prop-desc">${p.description.slice(0,100)}${p.description.length>100?'...':''}</div>` : ''}
+      </div>
+      <div class="prop-card-foot">
+        <button class="prop-action" onclick="editProperty('${p.id}')">✏️ Edit</button>
+        <button class="prop-action" onclick="toggleStatus('${p.id}','${p.status}')">${p.status==='available'?'⏸ Hold':'✅ Activate'}</button>
+        <button class="prop-action delete" onclick="deleteProperty('${p.id}')">🗑️</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── UPDATE STATS ──
+function updateStats() {
+  const available = properties.filter(p=>p.status==='available'||!p.status).length;
+  const sold = properties.filter(p=>p.status==='sold').length;
+  const totalValue = properties.reduce((sum,p)=>sum+(parseFloat(p.price)||0),0);
+  // Fix floating issue
+  const cleanTotal = parseFloat(totalValue.toFixed(2));
+  console.log('Stats:', {total: properties.length, available, sold, totalValue});
+  document.getElementById('ps-total').textContent = properties.length;
+  document.getElementById('ps-available').textContent = available;
+  document.getElementById('ps-sold').textContent = sold;
+  document.getElementById('ps-value').textContent = formatPrice(cleanTotal);
+}
+
+// ── SAVE PROPERTY ──
+window.saveProperty = async function() {
+    const bhk        = document.getElementById('f-bhk').value;
+  const rawPrice = document.getElementById('f-price').value;
+  const price = normalizePrice(rawPrice);
+  const type = document.getElementById('f-type').value;
+  let area = null;
+  let carpet_area = null;
+  let super_area = null;
+  if (type === "plot") {
+    area = parseFloat(document.getElementById('f-area').value) || null;
+  } else {
+    carpet_area = parseInt(document.getElementById('f-carpet').value) || null;
+    super_area = parseInt(document.getElementById('f-super').value) || null;
+  }
+  const location   = document.getElementById('f-location').value.trim();
+  const city       = document.getElementById('f-city').value.trim();
+  const floor      = document.getElementById('f-floor').value.trim();
+  const status     = document.getElementById('f-status').value;
+  const amenities  = document.getElementById('f-amenities').value.trim();
+  const description = document.getElementById('f-desc').value.trim();
+  const facing     = document.getElementById('f-facing').value;
+  const possession = document.getElementById('f-possession').value;
+
+  if (type !== 'plot' && !bhk) {
+  return showMsg('Please select BHK type', 'error');
+  }
+  if (!price || isNaN(price)) return showMsg('Please enter a valid price', 'error');
+  if (!location) return showMsg('Please enter location', 'error');
+
+  const btn = document.getElementById('save-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spin"></div> Saving...';
+
+  const { data: { user } } = await db.auth.getUser();
+  const agentId = user.id;
+
+  console.log("Saving agentId:", agentId);
+
+  const payload = {
+    agent_id: agentId,
+    type,
+    bhk: type === 'plot' ? null : bhk,
+    price,
+    area,
+    carpet_area,    
+    super_area,     
+    location,
+    city,
+    floor,
+    status,
+    amenities,
+    description,
+    facing,
+    possession
+  };
+
+  try {
+    if (editingId) {
+      // UPDATE
+      const { error } = await db
+        .from('properties')
+        .update(payload)
+        .eq('id', editingId);
+
+      if (error) throw error;
+
+      showMsg('✅ Property updated!', 'success');
+
+    } else {
+      // INSERT
+      const { error } = await db
+        .from('properties')
+        .insert([payload]);
+
+      if (error) throw error;
+
+      showMsg('✅ Property added!', 'success');
+    }
+
+    await loadProperties();
+    setTimeout(closeModal, 1200);
+
+  } catch (e) {
+    showMsg(e.message, 'error');
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Save Property';
+}
+// ── EDIT ──
+function editProperty(id) { openModal(id); }
+
+// ── TOGGLE STATUS ──
+async function toggleStatus(id, currentStatus) {
+  const newStatus = currentStatus === 'available' ? 'hold' : 'available';
+  await db.from('properties').update({ status: newStatus }).eq('id', id);
+  await loadProperties();
+}
+
+// ── DELETE ──
+async function deleteProperty(id) {
+  if (!confirm('Delete this property? Your AI will stop suggesting it to buyers.')) return;
+  await db.from('properties').delete().eq('id', id);
+  await loadProperties();
+}
+
+// ── HELPERS ──
+function statusLabel(s) {
+  return s==='sold'?'Sold':s==='hold'?'On Hold':'Available';
+}
+function normalizePrice(value) {
+  if (!value) return null;
+
+  let v = value.toString().toLowerCase().trim();
+
+  // If user types "1.2cr"
+  if (v.includes("cr")) {
+    return parseFloat(v) * 100;
+  }
+
+  // If user types "50l"
+  if (v.includes("l")) {
+    return parseFloat(v);
+  }
+
+  let num = parseFloat(v);
+
+  if (isNaN(num)) return null; // ✅ FIX
+
+  // Smart guess
+  if (num <= 10) {
+    return num * 100;
+  }
+
+  return num;
+}
+  function formatPrice(price) {
+  if (!price) return "₹0";
+
+  if (price >= 100) {
+    let cr = (price / 100).toFixed(1); 
+    return `₹${cr} Cr`;
+  }
+
+  return `₹${price} L`;
+}
+  function showMsg(msg, type) {
+  const el = document.getElementById('modal-msg');
+  el.textContent = msg;
+  el.className = `msg-bar ${type}`;
+}
+  function handleTypeChange() {
+  const type = document.getElementById("f-type").value;
+  const bhk = document.getElementById("f-bhk");
+
+  const plotBox = document.getElementById("plot-area-box");
+  const builtBox = document.getElementById("built-area-box");
+
+  if (type === "plot") {
+    // Disable BHK
+    bhk.value = "";
+    bhk.disabled = true;
+    // Show plot area
+    plotBox.style.display = "block";
+    builtBox.style.display = "none";
+
+  } else if (type === "flat" || type === "villa") {
+    // Enable BHK
+    bhk.disabled = false;
+    // Show built area
+    plotBox.style.display = "none";
+    builtBox.style.display = "block";
+  }
+}
+document.addEventListener('keydown', e => { if(e.key==='Escape') window.closeModal(); });
+</script>
+<script>
+  
+// ── OPEN MODAL ──
+window.openModal = function(id = null) {
+  editingId = id;
+  clearForm();
+
+  if (id) {
+    const p = properties.find(x=>x.id===id);
+    if (p) {
+      document.getElementById('modal-title').textContent = 'Edit Property';
+      document.getElementById('f-bhk').value = p.bhk || '';
+      document.getElementById('f-price').value = p.price || '';
+      document.getElementById('f-area').value = p.area || '';
+      document.getElementById('f-location').value = p.location || '';
+      document.getElementById('f-city').value = p.city || '';
+      document.getElementById('f-floor').value = p.floor || '';
+      document.getElementById('f-status').value = p.status || 'available';
+      document.getElementById('f-amenities').value = p.amenities || '';
+      document.getElementById('f-desc').value = p.description || '';
+      document.getElementById('f-facing').value = p.facing || '';
+      document.getElementById('f-possession').value = p.possession || 'ready';
+    }
+  } else {
+    document.getElementById('modal-title').textContent = 'Add New Property';
+  }
+
+  document.getElementById('modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+};
+</script>
+<script>
+console.log("JS LOADED");
+
+window.handleOverlay = function(e) {
+  if (e.target === document.getElementById('modal')) window.closeModal();
+};
+
+window.closeModal = function() {
+  document.getElementById('modal').classList.remove('open');
+  document.body.style.overflow = '';
+  editingId = null;
+  clearForm();
+};
+
+window.clearForm = function() {
+  ['f-bhk','f-price','f-area','f-location','f-floor','f-amenities','f-desc','f-facing'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+
+  document.getElementById('f-status').value = 'available';
+  document.getElementById('f-possession').value = 'ready';
+
+  showMsg('', '');  
+};
+
+  (async () => {
+
+  const { data: { session } } = await db.auth.getSession();
+
+  if (!session) {
+    console.log("No session, redirecting...");
+    window.location.href = "/portal";
+    return;
+  }
+
+  currentAgent = session.user;
+
+  console.log("Logged in:", currentAgent.id);
+
+  await loadProperties();
+
+})();
+
+  window.logout = async function() {
+  await db.auth.signOut();
+  location.href = "/portal"; // better redirect to login page
+};
+
+</script>
 
 </body>
 </html>
