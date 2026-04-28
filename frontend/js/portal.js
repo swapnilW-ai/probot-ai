@@ -187,7 +187,13 @@ if (currentAgent) {
 // ═══════════════════════════════════════════
 // SHOW DASHBOARD
 // ═══════════════════════════════════════════
-
+function showDashboard() {
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('dashboard').classList.add('show');
+  loadLeads();
+  loadStats();
+  setPill('blue', '✓ Connected · Your Data Only');
+}
 function setPill(cls, txt) {
   const p = document.getElementById('db-pill');
   p.className = `pill ${cls}`;
