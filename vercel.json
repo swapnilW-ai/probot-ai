@@ -2,10 +2,7 @@
   "version": 2,
 
   "builds": [
-    { "src": "api/webhook.js", "use": "@vercel/node" },
-    { "src": "**/*.html", "use": "@vercel/static" },
-    { "src": "frontend/js/**/*.js", "use": "@vercel/static" },
-    { "src": "frontend/styles/**/*.css", "use": "@vercel/static" }
+    { "src": "api/webhook.js", "use": "@vercel/node" }
   ],
 
   "routes": [
@@ -17,6 +14,6 @@
     { "src": "^/dashboard$", "dest": "/frontend/pages/agent-dashboard.html" },
     { "src": "^/properties$", "dest": "/frontend/pages/properties.html" },
 
-    { "src": "^/frontend/(.*)", "dest": "/frontend/$1" }
+    { "handle": "filesystem" }
   ]
 }
