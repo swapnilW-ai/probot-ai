@@ -1,26 +1,15 @@
 {
   "version": 2,
-
   "builds": [
-    {
-      "src": "api/webhook.js",
-      "use": "@vercel/node"
-    },
-    {
-      "src": "frontend/pages/*.html",
-      "use": "@vercel/static"
-    }
+    { "src": "api/webhook.js", "use": "@vercel/node" }
   ],
-
   "routes": [
     { "src": "/api/webhook", "dest": "/api/webhook.js" },
 
-    { "src": "^/$", "dest": "/frontend/pages/index.html" },
+    { "src": "^/$", "dest": "/index.html" },
 
     { "src": "^/portal$", "dest": "/frontend/pages/agent-portal.html" },
     { "src": "^/dashboard$", "dest": "/frontend/pages/agent-dashboard.html" },
-    { "src": "^/properties$", "dest": "/frontend/pages/properties.html" },
-
-    { "src": "/(.*)", "dest": "/frontend/pages/$1" }
+    { "src": "^/properties$", "dest": "/frontend/pages/properties.html" }
   ]
 }
