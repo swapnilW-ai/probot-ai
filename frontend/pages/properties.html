@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>My Properties — PropBot AI</title>
+
+<link rel="stylesheet" href="/frontend/styles/properties.css">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sb-logo">PropBot AI</div>
+
+  <div class="sb-item" onclick="location.href='/frontend/pages/agent-dashboard.html'">Dashboard</div>
+  <div class="sb-item active">My Properties</div>
+  <div class="sb-item">Site Visits</div>
+  <div class="sb-item">Followups</div>
+
+  <div class="sb-item" onclick="logout()">Logout</div>
+
+  <div class="sb-bottom">
+    <div id="sb-avatar">?</div>
+    <div id="sb-name">Loading...</div>
+    <div id="sb-plan"></div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <h2>My Properties</h2>
+    <button onclick="openModal()">+ Add</button>
+  </div>
+
+  <div id="prop-grid"></div>
+</div>
+
+<!-- MODAL -->
+<div id="modal" class="modal">
+  <input id="f-type" placeholder="type">
+  <input id="f-bhk" placeholder="bhk">
+  <input id="f-price" placeholder="price">
+  <input id="f-location" placeholder="location">
+  <button onclick="saveProperty()">Save</button>
+</div>
+
+<!-- JS -->
+<script src="/frontend/js/app.js"></script>
+<script src="/frontend/js/properties.js"></script>
+
+</body>
+</html>
