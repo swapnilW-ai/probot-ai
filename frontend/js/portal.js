@@ -1,4 +1,4 @@
-<script>
+
 const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-8b:generateContent?key=AIzaSyBqdGK5fk9GGQKpcb2uInnWV1CvqUPi5nQ';
 
 const AGENT_PROMPT = `You are an expert AI real estate assistant for a property agent in Nashik, Maharashtra, India.
@@ -378,4 +378,4 @@ if (chatInput) {
   });
 }    
   );
-</script>
+
