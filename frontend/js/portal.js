@@ -9,7 +9,7 @@ Ask about BHK, budget, location. Offer site visit. Never say you are AI.`;
 let currentAgent = null;
 let convHistory = [];
 let sessionReplies = 0;
-
+//load Agent
 window.loadAgentProfile = async function(user) {
 
   let { data: profile } = await db
@@ -19,6 +19,30 @@ window.loadAgentProfile = async function(user) {
     .maybeSingle();
 
   currentAgent = profile;
+
+  // UPDATE UI HERE 
+  if (currentAgent) {
+
+    const initials = (currentAgent.name || "U")
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .slice(0,2)
+      .toUpperCase();
+
+    document.getElementById('sb-avatar').textContent = initials;
+    document.getElementById('sb-name').textContent = currentAgent.name || "User";
+
+    document.getElementById('sb-plan').textContent =
+      `${currentAgent.plan?.toUpperCase()} · ${currentAgent.city || ''}`;
+
+    document.getElementById('topbar-date').textContent =
+      new Date().toLocaleDateString('en-IN',{
+        weekday:'long',
+        day:'numeric',
+        month:'short'
+      }) + ` · ${currentAgent.city || ''}`;
+  }
 
 };
 
