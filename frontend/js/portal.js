@@ -13,13 +13,21 @@ let sessionReplies = 0;
 // ═══════════════════════════════════════════
 // INIT — Check if already logged in
 // ═══════════════════════════════════════════
-document.getElementById('topbar-date').textContent =
-  new Date().toLocaleDateString('en-IN', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric'
-  });
+document.addEventListener('DOMContentLoaded', () => {
+
+  const dateEl = document.getElementById('topbar-date');
+
+  if (dateEl) {
+    dateEl.textContent =
+      new Date().toLocaleDateString('en-IN', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+      });
+  }
+
+});
 
 (async () => {
   const { data: { session } } = await db.auth.getSession();
