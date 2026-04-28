@@ -1,0 +1,208 @@
+/* ─────────────────────────────────────────────
+   RESET
+───────────────────────────────────────────── */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  display: flex;
+  font-family: 'Inter', sans-serif;
+  background: #0f0f10;
+  color: #fff;
+  height: 100vh;
+  overflow: hidden;
+}
+
+
+/* ─────────────────────────────────────────────
+   SIDEBAR
+───────────────────────────────────────────── */
+.sidebar {
+  width: 220px;
+  background: #111;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-right: 1px solid #222;
+}
+
+.logo {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 30px;
+}
+
+.nav-item {
+  padding: 10px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  border-radius: 8px;
+  color: #aaa;
+}
+
+.nav-item:hover {
+  background: #1a1a1a;
+  color: #fff;
+}
+
+
+/* ─────────────────────────────────────────────
+   MAIN AREA
+───────────────────────────────────────────── */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+
+/* ─────────────────────────────────────────────
+   TOP BAR
+───────────────────────────────────────────── */
+.top {
+  padding: 20px;
+  border-bottom: 1px solid #222;
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 600;
+}
+
+
+/* ─────────────────────────────────────────────
+   STATS
+───────────────────────────────────────────── */
+.stats {
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+}
+
+.card {
+  flex: 1;
+  background: #151515;
+  border: 1px solid #222;
+  border-radius: 12px;
+  padding: 15px;
+}
+
+.stat {
+  font-size: 24px;
+  font-weight: bold;
+  margin-top: 5px;
+}
+
+
+/* ─────────────────────────────────────────────
+   GRID
+───────────────────────────────────────────── */
+.grid {
+  display: flex;
+  flex: 1;
+  gap: 20px;
+  padding: 20px;
+  overflow: hidden;
+}
+
+
+/* ─────────────────────────────────────────────
+   LEADS
+───────────────────────────────────────────── */
+.leads {
+  flex: 1;
+  background: #151515;
+  border-radius: 12px;
+  padding: 15px;
+  overflow-y: auto;
+}
+
+.lead {
+  padding: 10px;
+  border-bottom: 1px solid #222;
+  color: #ccc;
+}
+
+
+/* ─────────────────────────────────────────────
+   CHAT
+───────────────────────────────────────────── */
+.chat {
+  width: 350px;
+  background: #151515;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.chat-box {
+  flex: 1;
+  padding: 10px;
+  overflow-y: auto;
+}
+
+.msg {
+  margin: 8px 0;
+  padding: 10px;
+  border-radius: 8px;
+  max-width: 80%;
+}
+
+.msg.user {
+  background: #22c55e;
+  color: #000;
+  align-self: flex-end;
+}
+
+.msg.ai {
+  background: #222;
+}
+
+
+/* ─────────────────────────────────────────────
+   CHAT INPUT
+───────────────────────────────────────────── */
+.chat-input {
+  display: flex;
+  border-top: 1px solid #222;
+}
+
+.chat-input input {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  background: #111;
+  color: #fff;
+}
+
+.chat-input button {
+  padding: 10px 15px;
+  border: none;
+  background: #22c55e;
+  cursor: pointer;
+}
+
+
+/* ─────────────────────────────────────────────
+   LOADING SPINNER
+───────────────────────────────────────────── */
+.spin {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #fff;
+  border-top: 2px solid transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
