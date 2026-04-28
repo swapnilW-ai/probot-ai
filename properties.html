@@ -520,7 +520,9 @@ window.saveProperty = async function() {
   const facing     = document.getElementById('f-facing').value;
   const possession = document.getElementById('f-possession').value;
 
-  if (!bhk) return showMsg('Please select BHK type', 'error');
+  if (type !== 'plot' && !bhk) {
+  return showMsg('Please select BHK type', 'error');
+  }
   if (!price || isNaN(price)) return showMsg('Please enter a valid price', 'error');
   if (!location) return showMsg('Please enter location', 'error');
 
@@ -536,7 +538,7 @@ window.saveProperty = async function() {
   const payload = {
     agent_id: agentId,
     type,
-    bhk,
+    bhk: type === 'plot' ? null : bhk,
     price,
     area,
     carpet_area,    
