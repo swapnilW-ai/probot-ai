@@ -6,6 +6,8 @@
 <title>PropBot AI — Agent Portal</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/frontend/js/app.js"></script>   <!-- MUST come first -->
+<script src="/frontend/js/portal.js"></script>
 <style>
   :root {
     --bg:#f8f6f1; --black:#111; --white:#fff;
@@ -395,7 +397,14 @@
 </div>
 
 <script>
-
+// ═══════════════════════════════════════════
+// SUPABASE SETUP
+// ═══════════════════════════════════════════
+//const { createClient } = supabase;
+//const db = createClient(
+//  'https://zejcequtmrmetogbxudz.supabase.co',
+//  'sb_publishable_MDKa6Y4VCUoVA_UeBdaQ8w_93qDws5E'
+//);
 
 const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-8b:generateContent?key=AIzaSyBqdGK5fk9GGQKpcb2uInnWV1CvqUPi5nQ';
 
