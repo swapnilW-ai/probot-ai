@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent Dashboard</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg:#f6f7fb;
+  --card:#ffffff;
+  --black:#111;
+  --green:#22c55e;
+  --border:#e5e7eb;
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:'Inter',sans-serif;
+  background:var(--bg);
+  display:flex;
+  height:100vh;
+}
+
+/* Sidebar */
+.sidebar{
+  width:240px;
+  background:#111;
+  color:#fff;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  padding:20px;
+}
+.logo{font-weight:700;font-size:18px;margin-bottom:20px;}
+.nav-item{
+  padding:10px;
+  border-radius:8px;
+  cursor:pointer;
+}
+.nav-item:hover{background:#222}
+
+/* Main */
+.main{
+  flex:1;
+  padding:25px;
+  display:flex;
+  flex-direction:column;
+  gap:20px;
+  overflow:auto;
+}
+
+/* Top */
+.top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.title{font-size:20px;font-weight:600}
+
+/* Stats */
+.stats{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:15px;
+}
+.card{
+  background:var(--card);
+  padding:20px;
+  border-radius:12px;
+  border:1px solid var(--border);
+}
+.stat{font-size:22px;font-weight:700}
+
+/* Grid */
+.grid{
+  display:grid;
+  grid-template-columns:1.2fr 1fr;
+  gap:20px;
+}
+
+/* Leads */
+.leads{
+  background:var(--card);
+  padding:15px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  max-height:400px;
+  overflow:auto;
+}
+.lead{
+  padding:10px;
+  border-bottom:1px solid var(--border);
+  font-size:14px;
+}
+
+/* Chat */
+.chat{
+  background:var(--card);
+  border-radius:12px;
+  border:1px solid var(--border);
+  display:flex;
+  flex-direction:column;
+}
+.chat-box{
+  flex:1;
+  padding:10px;
+  overflow:auto;
+}
+.msg{margin:6px 0;font-size:14px;}
+.user{text-align:right}
+.ai{text-align:left}
+
+.chat-input{
+  display:flex;
+  border-top:1px solid var(--border);
+}
+.chat-input input{
+  flex:1;
+  padding:10px;
+  border:none;
+  outline:none;
+}
+.chat-input button{
+  width:60px;
+  border:none;
+  background:var(--green);
+  color:#fff;
+  cursor:pointer;
+}
+
+/* Loader */
+.spin{
+  width:14px;height:14px;
+  border:2px solid rgba(255,255,255,0.3);
+  border-top-color:#fff;
+  border-radius:50%;
+  animation:spin 0.6s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+
+<body>
+
+<div class="sidebar">
+  <div>
+    <div class="logo">AI Agent</div>
+    <div class="nav-item">Dashboard</div>
+    <div class="nav-item" onclick="logout()">Logout</div>
+  </div>
+  <div id="agent"></div>
+</div>
+
+<div class="main">
+
+<div class="top">
+  <div class="title">Dashboard</div>
+</div>
+
+<div class="stats">
+  <div class="card"><div>Total Leads</div><div class="stat" id="total">0</div></div>
+  <div class="card"><div>Hot Leads</div><div class="stat" id="hot">0</div></div>
+  <div class="card"><div>Today</div><div class="stat" id="today">0</div></div>
+</div>
+
+<div class="grid">
+
+<!-- Leads -->
+<div class="leads" id="leads"></div>
+
+<!-- Chat -->
+<div class="chat">
+  <div class="chat-box" id="chat"></div>
+  <div class="chat-input">
+    <input id="msg" placeholder="Type message..." />
+    <button onclick="sendMsg()" id="btn">Send</button>
+  </div>
+</div>
+
+</div>
+</div>
+
+<script>
+const db = supabase.createClient(
+  'https://zejcequtmrmetogbxudz.supabase.co',
+  'sb_publishable_MDKa6Y4VCUoVA_UeBdaQ8w_93qDws5E'
+);
+
+let user;
+
+(async ()=>{
+  const { data:{session} } = await db.auth.getSession();
+  if(!session){ location.href="/agent-portal.html"; return; }
+  user = session.user;
+
+  document.getElementById("agent").innerText = user.email;
+
+  loadLeads();
+})();
+
+async function logout(){
+  await db.auth.signOut();
+  location.href="/";
+}
+
+async function loadLeads(){
+  const { data } = await db.from("leads").select("*").eq("agent_id", user.id);
+
+  document.getElementById("leads").innerHTML = data.map(l=>`
+    <div class="lead">${l.name} • ${l.bhk} • ₹${l.budget_max}</div>
+  `).join("");
+
+  document.getElementById("total").innerText = data.length;
+  document.getElementById("hot").innerText = data.filter(l=>l.score==="hot").length;
+  document.getElementById("today").innerText = data.length;
+}
+
+function extractIntent(t){
+  t=t.toLowerCase();
+  return {
+    bhk: t.includes("2")?"2BHK":null,
+    budget_max: t.match(/\d+/)?.[0],
+    location: t.includes("nashik")?"Nashik":null
+  }
+}
+
+async function getProps(f){
+  let q=db.from("properties").select("*").eq("agent_id", user.id);
+  if(f.bhk) q=q.eq("bhk",f.bhk);
+  if(f.budget_max) q=q.lte("price",f.budget_max);
+  const { data }=await q.limit(3);
+  return data||[];
+}
+
+function addMsg(t,c){
+  const d=document.createElement("div");
+  d.className="msg "+c;
+  d.innerText=t;
+  const chat=document.getElementById("chat");
+  chat.appendChild(d);
+  chat.scrollTo({top:chat.scrollHeight,behavior:"smooth"});
+}
+
+async function sendMsg(){
+  const i=document.getElementById("msg");
+  const btn=document.getElementById("btn");
+
+  const text=i.value.trim();
+  if(!text)return;
+
+  addMsg(text,"user");
+  i.value="";
+
+  btn.disabled=true;
+  btn.innerHTML='<div class="spin"></div>';
+
+  const intent=extractIntent(text);
+  const props=await getProps(intent);
+
+  let reply="No match";
+  if(props.length){
+    reply=props.map(p=>`${p.bhk} ${formatPrice(p.price)}`).join("\n");
+  }
+
+  setTimeout(()=>addMsg(reply,"ai"),600);
+
+  await db.from("leads").insert([{
+    agent_id:user.id,
+    bhk:intent.bhk,
+    budget_max:intent.budget_max,
+    location:intent.location
+  }]);
+
+  loadLeads();
+
+  btn.disabled=false;
+  btn.innerHTML="Send";
+}
+</script>
+
+</body>
+</html>
