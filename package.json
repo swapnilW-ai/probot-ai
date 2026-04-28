@@ -2,6 +2,13 @@
   "name": "propbot-ai",
   "version": "1.0.0",
   "description": "PropBot AI — WhatsApp AI Agent for Real Estate",
+  "private": true,
+
+  "scripts": {
+    "start": "node api/webhook.js",
+    "dev": "vercel dev"
+  },
+
   "dependencies": {
     "twilio": "^4.19.0"
   }
