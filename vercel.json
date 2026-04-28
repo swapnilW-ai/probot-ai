@@ -15,7 +15,7 @@
 
     { "src": "/", "dest": "/index.html" },
 
-    { "src": "^/dashboard$", "dest": "/frontend/pages/agent-dashboard.html" }
+    { "src": "^/dashboard$", "dest": "/frontend/pages/agent-dashboard.html" },
     { "src": "^/portal$", "dest": "/frontend/pages/agent-portal.html" },
     { "src": "^/properties$", "dest": "/frontend/pages/properties.html" },
 
