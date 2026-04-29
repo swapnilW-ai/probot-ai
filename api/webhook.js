@@ -13,10 +13,13 @@ const SUPABASE_KEY     = process.env.SUPABASE_KEY;
 const TWILIO_WA_NUMBER = 'whatsapp:+14155238886';
 const SUPABASE_URL     = 'https://zejcequtmrmetogbxudz.supabase.co';
 
+// ❗ Gemini unchanged (as you said)
 const GEMINI_URL   = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-8b:generateContent?key=' + GEMINI_API_KEY;
+
 const twilioClient = twilio(TWILIO_SID, TWILIO_AUTH);
 
-export default async function handler(req, res) {
+// ✅ FIXED: CommonJS export
+module.exports = async function handler(req, res) {
 
   if (req.method !== 'POST') {
     return res.status(405).send('Method Not Allowed');
@@ -30,9 +33,8 @@ export default async function handler(req, res) {
 
   try {
 
-    // ✅ NEW ROUTING LOGIC
+    // 🔥 ROUTING
     const agent = await getOrAssignAgent(fromNumber);
-
     console.log("Agent object:", agent);
 
     const agentProperties = await getAgentProperties(agent?.id);
@@ -61,9 +63,9 @@ export default async function handler(req, res) {
     console.error('❌ Error:', err.message);
     return res.status(200).send('<Response></Response>');
   }
-}
+};
 
-// 🔥 ROUTING FUNCTION
+// 🔥 ROUTING FUNCTION (FIXED)
 async function getOrAssignAgent(fromNumber) {
   const phone = fromNumber.replace('whatsapp:', '');
 
@@ -79,6 +81,7 @@ async function getOrAssignAgent(fromNumber) {
 
   const leads = await leadRes.json();
 
+  // ✅ Existing lead
   if (leads?.length > 0 && leads[0].agent_id) {
     console.log("🔁 Existing lead → reuse agent");
 
@@ -96,6 +99,7 @@ async function getOrAssignAgent(fromNumber) {
     return agentData[0] || null;
   }
 
+  // ❌ New lead → assign agent
   console.log("🆕 New lead → assigning agent");
 
   const agentsRes = await fetch(
@@ -108,10 +112,18 @@ async function getOrAssignAgent(fromNumber) {
     }
   );
 
+  const agents = await agentsRes.json(); // ✅ FIXED
+
   console.log("📦 Agents from DB:", agents);
-  return agents[0] || null;
+
+  const assignedAgent = agents[0] || null;
+
+  console.log("👤 Assigned agent:", assignedAgent?.id);
+
+  return assignedAgent;
 }
 
+// ── GET PROPERTIES ──
 async function getAgentProperties(agentId) {
   if (!agentId) return [];
 
@@ -126,15 +138,15 @@ async function getAgentProperties(agentId) {
       }
     );
 
-    const data = await res.json();
-    return data || [];
+    return await res.json();
 
   } catch (e) {
     console.error('getAgentProperties error:', e.message);
     return [];
   }
 }
-// agent Prompt
+
+// ── PROMPT ──
 function buildAgentPrompt(agent, properties) {
 
   let listingsText = '';
@@ -142,22 +154,19 @@ function buildAgentPrompt(agent, properties) {
   if (properties.length === 0) {
     listingsText = 'No listings available right now.';
   } else {
-    listingsText = properties.map((p, i) => {
-      return `${i + 1}. ${p.bhk} in ${p.location} - ₹${p.price}L`;
-    }).join('\n');
+    listingsText = properties.map((p, i) =>
+      `${i + 1}. ${p.bhk} in ${p.location} - ₹${p.price}L`
+    ).join('\n');
   }
 
-  const agentName = agent?.name || 'Agent';
+  return `You are a real estate assistant for ${agent?.name || 'Agent'}.
 
-  return `You are a real estate assistant for ${agentName}.
-
-Available listings:
 ${listingsText}
 
-Reply short, friendly, WhatsApp style.`;
+Reply short, friendly.`;
 }
 
-//----History
+// ── HISTORY ──
 async function getHistory(fromNumber, agentId) {
   try {
     const phone = fromNumber.replace('whatsapp:', '');
@@ -199,11 +208,31 @@ async function getHistory(fromNumber, agentId) {
   }
 }
 
-// ── SAVE LEAD FIXED ──
+// ── GEMINI ──
+async function getGeminiReply(systemPrompt, history) {
+
+  const contents = [
+    { role: 'user',  parts: [{ text: systemPrompt }] },
+    ...history
+  ];
+
+  const response = await fetch(GEMINI_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ contents })
+  });
+
+  const data = await response.json();
+
+  return data.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, try again.";
+}
+
+// ── SAVE ──
 async function saveToSupabase(userMsg, aiReply, fromNumber, profileName, agentId) {
+
   const phone = fromNumber.replace('whatsapp:', '');
 
-  const saveRes = await fetch(`${SUPABASE_URL}/rest/v1/leads`, {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/leads`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -213,13 +242,13 @@ async function saveToSupabase(userMsg, aiReply, fromNumber, profileName, agentId
     },
     body: JSON.stringify({
       agent_id: agentId || null,
-      name: profileName || 'WhatsApp Buyer',
+      name: profileName || 'Buyer',
       phone
     })
   });
 
-  const saved = await saveRes.json();
-  const leadId = saved?.[0]?.id;
+  const data = await res.json();
+  const leadId = data?.[0]?.id;
 
   if (leadId) {
     await fetch(`${SUPABASE_URL}/rest/v1/conversations`, {
