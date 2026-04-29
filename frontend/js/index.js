@@ -5,7 +5,7 @@ const RAZORPAY_KEY = 'rzp_live_SiRzzkBb3FKaQQ';
 let currentPlan = 'pro';
 
 // ✅ OPEN MODAL (FIXED)
-window.openModal = function(plan)) {
+window.openModal = function(plan) {
   currentPlan = plan;
   document.getElementById('modal').classList.add('open');
   document.getElementById('signup-screen').style.display = 'block';
