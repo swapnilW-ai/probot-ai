@@ -24,9 +24,9 @@ score: hot=clear budget+wants to visit, warm=interested, cold=browsing. budget_m
 // ── MAIN HANDLER ──────────────────────────────────────
 export default async function handler(req, res) {
 
-  if (req.method === 'GET') {
-    return res.status(200).json({ status: '✅ PropBot AI Webhook Live — Agent Properties Enabled' });
-  }
+  if (req.method !== 'POST') {
+  return res.status(405).send('Method Not Allowed');
+}
 
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
