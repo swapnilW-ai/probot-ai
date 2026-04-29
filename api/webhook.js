@@ -7,12 +7,12 @@
 const twilio = require('twilio');
 
 // ── CREDENTIALS ──────────────────────────────────────
-const TWILIO_SID       = 'ACc14b4a5b7ddb0ea49cf2414228edf4f7';
-const TWILIO_AUTH      = 'ff2df03a4765a323ad52b2ba1265d6eb';
+const TWILIO_SID       = process.env.TWILIO_SID;
+const TWILIO_AUTH      = process.env.TWILIO_AUTH;
+const GEMINI_API_KEY   = process.env.GEMINI_API_KEY;
+const SUPABASE_KEY     = process.env.SUPABASE_KEY;
 const TWILIO_WA_NUMBER = 'whatsapp:+14155238886';
-const GEMINI_API_KEY   = 'AIzaSyBqdGK5fk9GGQKpcb2uInnWV1CvqUPi5nQ';
 const SUPABASE_URL     = 'https://zejcequtmrmetogbxudz.supabase.co';
-const SUPABASE_KEY     = 'sb_publishable_MDKa6Y4VCUoVA_UeBdaQ8w_93qDws5E';
 
 const GEMINI_URL   = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-8b:generateContent?key=' + GEMINI_API_KEY;
 const twilioClient = twilio(TWILIO_SID, TWILIO_AUTH);
