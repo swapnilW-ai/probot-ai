@@ -108,7 +108,7 @@ async function getOrAssignAgent(fromNumber) {
     }
   );
 
-  const agents = await agentsRes.json();
+  console.log("📦 Agents from DB:", agents);
   return agents[0] || null;
 }
 
@@ -155,6 +155,48 @@ Available listings:
 ${listingsText}
 
 Reply short, friendly, WhatsApp style.`;
+}
+
+//----History
+async function getHistory(fromNumber, agentId) {
+  try {
+    const phone = fromNumber.replace('whatsapp:', '');
+
+    let url = `${SUPABASE_URL}/rest/v1/leads?phone=eq.${encodeURIComponent(phone)}&select=id`;
+    if (agentId) url += `&agent_id=eq.${agentId}`;
+    url += '&limit=1';
+
+    const leadRes = await fetch(url, {
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`,
+      },
+    });
+
+    const leads = await leadRes.json();
+    if (!leads?.length) return [];
+
+    const convRes = await fetch(
+      `${SUPABASE_URL}/rest/v1/conversations?lead_id=eq.${leads[0].id}&order=created_at.asc&limit=5&select=role,message`,
+      {
+        headers: {
+          apikey: SUPABASE_KEY,
+          Authorization: `Bearer ${SUPABASE_KEY}`,
+        },
+      }
+    );
+
+    const convs = await convRes.json();
+
+    return (convs || []).map(c => ({
+      role: c.role === 'user' ? 'user' : 'model',
+      parts: [{ text: c.message }]
+    }));
+
+  } catch (e) {
+    console.error('History error:', e.message);
+    return [];
+  }
 }
 
 // ── SAVE LEAD FIXED ──
