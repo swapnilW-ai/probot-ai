@@ -134,6 +134,28 @@ async function getAgentProperties(agentId) {
     return [];
   }
 }
+// agent Prompt
+function buildAgentPrompt(agent, properties) {
+
+  let listingsText = '';
+
+  if (properties.length === 0) {
+    listingsText = 'No listings available right now.';
+  } else {
+    listingsText = properties.map((p, i) => {
+      return `${i + 1}. ${p.bhk} in ${p.location} - ₹${p.price}L`;
+    }).join('\n');
+  }
+
+  const agentName = agent?.name || 'Agent';
+
+  return `You are a real estate assistant for ${agentName}.
+
+Available listings:
+${listingsText}
+
+Reply short, friendly, WhatsApp style.`;
+}
 
 // ── SAVE LEAD FIXED ──
 async function saveToSupabase(userMsg, aiReply, fromNumber, profileName, agentId) {
