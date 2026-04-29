@@ -112,6 +112,29 @@ async function getOrAssignAgent(fromNumber) {
   return agents[0] || null;
 }
 
+async function getAgentProperties(agentId) {
+  if (!agentId) return [];
+
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/properties?agent_id=eq.${agentId}&status=eq.available&select=*`,
+      {
+        headers: {
+          apikey: SUPABASE_KEY,
+          Authorization: `Bearer ${SUPABASE_KEY}`,
+        },
+      }
+    );
+
+    const data = await res.json();
+    return data || [];
+
+  } catch (e) {
+    console.error('getAgentProperties error:', e.message);
+    return [];
+  }
+}
+
 // ── SAVE LEAD FIXED ──
 async function saveToSupabase(userMsg, aiReply, fromNumber, profileName, agentId) {
   const phone = fromNumber.replace('whatsapp:', '');
