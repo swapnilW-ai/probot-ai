@@ -42,6 +42,7 @@ export default async function handler(req, res) {
   try {
     // 1. Find which agent owns this WhatsApp number
     const agent = await getAgent(toNumber);
+    console.log("Agent object:", agent);
     console.log(`🔎 Agent: ${agent ? agent.id + ' — ' + agent.name : 'NOT FOUND — using default'}`);
 
     // 2. Fetch that agent's properties from Supabase
