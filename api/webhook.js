@@ -102,6 +102,7 @@ async function getAgent(toNumber) {
     // Clean the number — remove whatsapp: prefix
     const phone = toNumber.replace('whatsapp:', '').trim();
     console.log(`🔍 Looking for agent with WA number: ${phone}`);
+    console.log("DEPLOY TEST v2");
 
     const res = await fetch(
       `${SUPABASE_URL}/rest/v1/agents?whatsapp_number=ilike.${phone}&select=*&limit=1`,
