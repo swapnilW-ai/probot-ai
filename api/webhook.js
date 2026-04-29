@@ -104,7 +104,7 @@ async function getAgent(toNumber) {
     console.log(`🔍 Looking for agent with WA number: ${phone}`);
 
     const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/agents?whatsapp_number=eq.${encodeURIComponent(phone)}&select=*&limit=1`,
+      `${SUPABASE_URL}/rest/v1/agents?whatsapp_number=ilike.${phone}&select=*&limit=1`,
       { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }
     );
     const agents = await res.json();
