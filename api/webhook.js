@@ -42,13 +42,13 @@ const signature = req.headers['x-twilio-signature'];
 const isValid = twilio.validateRequest(
   process.env.TWILIO_AUTH,
   signature,
-  'https://probot-ai.vercel.app/p/api/webhook', 
+  'https://probot-ai.vercel.app/api/webhook', 
   req.body
 );
-//this validation comented onky fr testing, remove this later
-//if (!isValid) {
-//  return res.status(403).send('Invalid request');
-//}
+
+if (!isValid) {
+  return res.status(403).send('Invalid request');
+}
 
 // Input validation  
 const incomingMsg = String(req.body.Body || '').trim();
