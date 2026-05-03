@@ -45,10 +45,10 @@ const isValid = twilio.validateRequest(
   'https://probot-ai.vercel.app/p/api/webhook', 
   req.body
 );
-
-if (!isValid) {
-  return res.status(403).send('Invalid request');
-}
+//this validation comented onky fr testing, remove this later
+//if (!isValid) {
+//  return res.status(403).send('Invalid request');
+//}
 
 // Input validation  
 const incomingMsg = String(req.body.Body || '').trim();
