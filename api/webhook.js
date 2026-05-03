@@ -31,18 +31,18 @@ function isRateLimited(key) {
 // Handler
 module.exports = async function handler(req, res) {
 
-  //  FIRST → Method check
+  // Method check
   if (req.method !== 'POST') {
     return res.status(405).send('Method Not Allowed');
   }
 
-//  THEN → Twilio signature validation
+//  Twilio signature validation
 const signature = req.headers['x-twilio-signature'];
 
 const isValid = twilio.validateRequest(
   process.env.TWILIO_AUTH,
   signature,
-  'https://your-app-name.vercel.app/api/webhook', 
+  'https://probot-ai.vercel.app/p/api/webhook', 
   req.body
 );
 
