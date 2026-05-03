@@ -17,17 +17,56 @@ const SUPABASE_URL     = 'https://zejcequtmrmetogbxudz.supabase.co';
 const GEMINI_URL   = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-8b:generateContent?key=' + GEMINI_API_KEY;
 
 const twilioClient = twilio(TWILIO_SID, TWILIO_AUTH);
+// Rate Limit
+const recentRequests = new Map();
 
-// ✅ FIXED: CommonJS export
+function isRateLimited(key) {
+  const now = Date.now();
+  const last = recentRequests.get(key) || 0;
+  if (now - last < 2000) return true;
+  recentRequests.set(key, now);
+  return false;
+}
+
+// Handler
 module.exports = async function handler(req, res) {
 
+  //  FIRST → Method check
   if (req.method !== 'POST') {
     return res.status(405).send('Method Not Allowed');
   }
 
-  const incomingMsg = req.body.Body || '';
-  const fromNumber  = req.body.From || '';
-  const profileName = req.body.ProfileName || 'Buyer';
+//  THEN → Twilio signature validation
+const signature = req.headers['x-twilio-signature'];
+
+const isValid = twilio.validateRequest(
+  process.env.TWILIO_AUTH,
+  signature,
+  'https://your-app-name.vercel.app/api/webhook', 
+  req.body
+);
+
+if (!isValid) {
+  return res.status(403).send('Invalid request');
+}
+
+// Input validation  
+const incomingMsg = String(req.body.Body || '').trim();
+const fromNumber  = String(req.body.From || '').trim();
+
+if (!incomingMsg || !fromNumber) {
+  return res.status(400).send('Invalid payload');
+}
+
+if (incomingMsg.length > 300) {
+  return res.status(413).send('Message too long');
+}
+
+if (isRateLimited(fromNumber)) {
+  return res.status(429).send('Too many requests');
+}
+  
+  const profileName = String(req.body.ProfileName || 'Buyer').slice(0, 50);
 
   console.log(`📩 FROM: ${fromNumber} | MSG: ${incomingMsg}`);
 
