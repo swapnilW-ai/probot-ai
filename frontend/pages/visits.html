@@ -774,54 +774,27 @@ body {
 
 <!-- ══ SIDEBAR ══════════════════════════════════ -->
 <div class="sidebar">
-  <div class="sb-logo">
-    <div class="sb-logo-mark">🤖</div>
-    <div>
-      <div class="sb-logo-text">PropBot AI</div>
-      <div class="sb-logo-sub">AGENT PORTAL</div>
-    </div>
-  </div>
-
-  <div class="sb-nav">
-    <div class="sb-group-label">Main</div>
-    <div class="sb-item" onclick="location.href='/dashboard'">
-      <div class="sb-icon">⚡</div> Dashboard
-    </div>
-    <div class="sb-item" onclick="location.href='/dashboard'">
-      <div class="sb-icon">👥</div> Leads
-    </div>
-    <div class="sb-item active">
-      <div class="sb-icon">📅</div>
-      Site Visits
-      <span class="sb-badge" id="pending-badge">0</span>
-    </div>
-
-    <div class="sb-group-label">Manage</div>
-    <div class="sb-item" onclick="location.href='/properties'">
-      <div class="sb-icon">🏠</div> Properties
-    </div>
-    <div class="sb-item">
-      <div class="sb-icon">🔁</div> Follow-ups
-    </div>
-
-    <div class="sb-group-label">Account</div>
-    <div class="sb-item">
-      <div class="sb-icon">⚙️</div> Settings
-    </div>
-    <div class="sb-item">
-      <div class="sb-icon">💳</div> Billing
-    </div>
-  </div>
-
+  <div class="sb-logo"><div class="sb-dot"></div>PropBot AI</div>
+  <div class="sb-section">Main</div>
+  <div class="sb-item" onclick="location.href='/portal'">⚡ Dashboard</div>
+  <div class="sb-item" onclick="location.href='/dashboard'">💬 Conversations</div>
+  <div class="sb-item" onclick="location.href='/dashboard'">👥 All Leads</div>
+  <div class="sb-section">Manage</div>
+  <div class="sb-item active">🏠 My Properties</div>
+  <div class="sb-item">📅 Site Visits</div>
+  <div class="sb-item">🔁 Follow-ups</div>
+  <div class="sb-section">Account</div>
+  <div class="sb-item">⚙️ Settings</div>
+  <div class="sb-item">💳 Billing</div>
+  <div class="sb-item" onclick="logout()">🚪 Logout</div>
   <div class="sb-bottom">
-    <div class="sb-agent-card">
+    <div class="sb-agent">
       <div class="sb-avatar" id="sb-avatar">?</div>
       <div>
-        <div class="sb-agent-name" id="sb-name">Loading...</div>
-        <div class="sb-agent-plan" id="sb-plan">PRO</div>
+        <div class="sb-name" id="sb-name">Loading...</div>
+        <div class="sb-plan" id="sb-plan">PRO</div>
       </div>
     </div>
-    <button class="sb-logout" onclick="logout()">↩ LogOut</button>
   </div>
 </div>
 
