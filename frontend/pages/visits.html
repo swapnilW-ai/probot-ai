@@ -1,38 +1,72 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Visit Dashboard</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Site Visits — PropBot AI</title>
 
-  <!-- CSS -->
-  <link rel="stylesheet" href="../css/visits.css">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/frontend/js/app.js"></script>
+<script src="/frontend/js/visits.js"></script>
+
+<link rel="stylesheet" href="/frontend/css/visits.css">
+
+<style>
+/* keep SAME variables + base styles */
+:root {
+  --bg:#f8f6f1;--black:#111;--white:#fff;
+  --green:#16a34a;--green-light:#22c55e;
+  --border:#e5e0d8;--shadow:0 1px 4px rgba(0,0,0,0.07);
+  --mono:'JetBrains Mono',monospace;
+  --sans:'Space Grotesk',sans-serif;
+}
+body{margin:0;display:flex;height:100vh;background:var(--bg);font-family:var(--sans);}
+
+/* reuse sidebar + layout (same as your existing file) */
+.sidebar{width:230px;background:#111;color:#fff;display:flex;flex-direction:column;}
+.sb-item{padding:0.6rem 1rem;cursor:pointer;}
+.sb-item.active{color:#22c55e;}
+.main{flex:1;display:flex;flex-direction:column;}
+.topbar{padding:1rem;border-bottom:1px solid var(--border);}
+.content{padding:1.5rem;overflow:auto;}
+</style>
+
 </head>
 
 <body>
 
-  <h1>📅 Visit Dashboard</h1>
+<!-- SIDEBAR -->
+<div class="sidebar">
 
-  <div class="dashboard">
+  <div class="sb-item" onclick="location.href='/portal'">⚡ Dashboard</div>
+  <div class="sb-item">💬 Conversations</div>
+  <div class="sb-item">👥 All Leads</div>
 
-    <!-- Card -->
-    <div class="card">
-      <h3>Rahul Sharma</h3>
-      <div class="meta">Property: 2BHK Baner</div>
-      <div class="meta">Time: Today 4:00 PM</div>
+  <div class="sb-item" onclick="location.href='/properties'">🏠 My Properties</div>
+  <div class="sb-item active">📅 Site Visits</div>
+  <div class="sb-item">🔁 Follow-ups</div>
 
-      <span class="status scheduled">Scheduled</span>
+</div>
 
-      <div class="actions">
-        <button class="start">Start</button>
-        <button class="reschedule">Reschedule</button>
-        <button class="cancel">Cancel</button>
-      </div>
-    </div>
+<!-- MAIN -->
+<div class="main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <h2>📅 Site Visits</h2>
+    <p>AI scheduled visits and tracking</p>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <div class="dashboard" id="visitContainer"></div>
 
   </div>
 
-  <!-- JS (next step) -->
-  <script src="../js/visits.js"></script>
+</div>
 
 </body>
 </html>
