@@ -28,6 +28,120 @@ function isRateLimited(key) {
   return false;
 }
 
+//////////////////////////////////////////////////////////
+// 🔥 NEW: VISIT INTENT DETECTION
+//////////////////////////////////////////////////////////
+function detectVisitIntent(msg) {
+  const text = msg.toLowerCase();
+
+  if (text.includes("visit") || text.includes("see property")) {
+    return "schedule_visit";
+  }
+
+  if (text.includes("confirm") || text.includes("book")) {
+    return "confirm_visit";
+  }
+
+  if (text.includes("price") || text.includes("negotiat")) {
+    return "handover";
+  }
+
+  return "normal";
+}
+
+//////////////////////////////////////////////////////////
+// 🔥 NEW: VISIT FLOW HANDLER
+//////////////////////////////////////////////////////////
+async function handleVisitFlow(intent) {
+
+  if (intent === "schedule_visit") {
+    return `Great! I can arrange a site visit 😊
+
+Available slots:
+• Tomorrow 11 AM
+• Tomorrow 3 PM
+• Day after 12 PM
+
+Reply with your preferred time 👍`;
+  }
+
+  if (intent === "confirm_visit") {
+    return "✅ Your visit has been booked successfully!";
+  }
+
+  if (intent === "handover") {
+    return "Connecting you with our agent for better assistance...";
+  }
+
+  return null;
+}
+
+// Handler
+module.exports = async function handler(req, res) {
+
+  if (req.method !== 'POST') {
+    return res.status(405).send('Method Not Allowed');
+  }
+  
+  //  Twilio signature validation
+  const signature = req.headers['x-twilio-signature'];
+
+  const isValid = twilio.validateRequest(
+    process.env.TWILIO_AUTH,
+    signature,
+    'https://probot-ai.vercel.app/api/webhook',
+    req.body
+  );
+
+  if (!isValid) {
+    return res.status(403).send('Invalid request');
+  }
+
+  // Input validation  
+  const incomingMsg = String(req.body.Body || '').trim();
+  const fromNumber  = String(req.body.From || '').trim();
+
+  if (!incomingMsg || !fromNumber) {
+    return res.status(400).send('Invalid payload');
+  }
+
+  if (incomingMsg.length > 300) {
+    return res.status(413).send('Message too long');
+  }
+
+  if (isRateLimited(fromNumber)) {
+    return res.status(429).send('Too many requests');
+  }
+
+  const profileName = String(req.body.ProfileName || 'Buyer').slice(0, 50);
+
+  console.log(`📩 FROM: ${fromNumber} | MSG: ${incomingMsg}`);
+
+  try {
+
+    // 🔥 ROUTING
+    const agent = await getOrAssignAgent(fromNumber);
+    console.log("Agent object:", agent);
+
+    //////////////////////////////////////////////////////////
+    // 🔥 NEW: AI VISIT INTERCEPTION
+    //////////////////////////////////////////////////////////
+    const intent = detectVisitIntent(incomingMsg);
+    const visitResponse = await handleVisitFlow(intent);
+
+    if (visitResponse) {
+      await twilioClient.messages.create({
+        body: visitResponse,
+        from: TWILIO_WA_NUMBER,
+        to: fromNumber
+      });
+
+      await saveToSupabase(incomingMsg, visitResponse, fromNumber, profileName, agent?.id);
+
+      return res.status(200).send('<Response></Response>');
+    }
+
+
 // Handler
 module.exports = async function handler(req, res) {
 
