@@ -3,6 +3,8 @@
 // ✅ Fetches EACH agent's real properties from Supabase
 // ✅ AI suggests correct listings per agent
 // ═══════════════════════════════════════════════════════
+// 🔥 NEW
+const { generateSlots } = require('./services/visitService');
 
 const twilio = require('twilio');
 
@@ -52,15 +54,21 @@ function detectVisitIntent(msg) {
 //////////////////////////////////////////////////////////
 // 🔥 NEW: VISIT FLOW HANDLER
 //////////////////////////////////////////////////////////
-async function handleVisitFlow(intent) {
+async function handleVisitFlow(intent, incomingMsg, agent) {
 
   if (intent === "schedule_visit") {
+
+    const date = extractDate(incomingMsg);
+    const slots = await generateSlots(agent.id, date);
+
+    if (!slots.length) {
+      return `No slots available on ${date}. Please choose another day 🙏`;
+    }
+
     return `Great! I can arrange a site visit 😊
 
-Available slots:
-• Tomorrow 11 AM
-• Tomorrow 3 PM
-• Day after 12 PM
+Available slots on ${date}:
+${slots.map(s => `• ${formatTime(s)}`).join("\n")}
 
 Reply with your preferred time 👍`;
   }
@@ -113,6 +121,31 @@ module.exports = async function handler(req, res) {
     return res.status(429).send('Too many requests');
   }
 
+  //dynamic booking
+  // 🔥 NEW (basic version)
+function extractDate(msg) {
+  const text = msg.toLowerCase();
+
+  if (text.includes("tomorrow")) {
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    return d.toISOString().split("T")[0];
+  }
+
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  return d.toISOString().split("T")[0];
+}
+// 🔥 NEW
+function formatTime(t) {
+  const [h, m] = t.split(":");
+  let hour = parseInt(h);
+
+  const ampm = hour >= 12 ? "PM" : "AM";
+  hour = hour % 12 || 12;
+
+  return `${hour}:${m} ${ampm}`;
+}
   const profileName = String(req.body.ProfileName || 'Buyer').slice(0, 50);
 
   console.log(`📩 FROM: ${fromNumber} | MSG: ${incomingMsg}`);
@@ -127,7 +160,7 @@ module.exports = async function handler(req, res) {
     // 🔥 NEW: AI VISIT INTERCEPTION
     //////////////////////////////////////////////////////////
     const intent = detectVisitIntent(incomingMsg);
-    const visitResponse = await handleVisitFlow(intent);
+    const visitResponse = await handleVisitFlow(intent, incomingMsg, agent);
 
     if (visitResponse) {
       await twilioClient.messages.create({
@@ -141,54 +174,6 @@ module.exports = async function handler(req, res) {
       return res.status(200).send('<Response></Response>');
     }
 
-
-// Handler
-module.exports = async function handler(req, res) {
-
-  // Method check
-  if (req.method !== 'POST') {
-    return res.status(405).send('Method Not Allowed');
-  }
-
-//  Twilio signature validation
-const signature = req.headers['x-twilio-signature'];
-
-const isValid = twilio.validateRequest(
-  process.env.TWILIO_AUTH,
-  signature,
-  'https://probot-ai.vercel.app/api/webhook', 
-  req.body
-);
-
-if (!isValid) {
-  return res.status(403).send('Invalid request');
-}
-
-// Input validation  
-const incomingMsg = String(req.body.Body || '').trim();
-const fromNumber  = String(req.body.From || '').trim();
-
-if (!incomingMsg || !fromNumber) {
-  return res.status(400).send('Invalid payload');
-}
-
-if (incomingMsg.length > 300) {
-  return res.status(413).send('Message too long');
-}
-
-if (isRateLimited(fromNumber)) {
-  return res.status(429).send('Too many requests');
-}
-  
-  const profileName = String(req.body.ProfileName || 'Buyer').slice(0, 50);
-
-  console.log(`📩 FROM: ${fromNumber} | MSG: ${incomingMsg}`);
-
-  try {
-
-    // 🔥 ROUTING
-    const agent = await getOrAssignAgent(fromNumber);
-    console.log("Agent object:", agent);
 
     //////////////////////////////////////////////////////////
     // 🔥 NEW: AI VISIT INTERCEPTION
