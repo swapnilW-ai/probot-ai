@@ -302,6 +302,10 @@ return res.status(200).send("Got it ");
     return res.status(200).send('<Response></Response>');
 
   }
+  catch (err) {
+  console.error('❌ Error:', err);
+  return res.status(200).send('<Response></Response>');
+}
   
   
 //  NEW
