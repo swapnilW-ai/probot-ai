@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Site Visits — PropBot AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/frontend/styles/visits.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<div class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-mark">🤖</div>
+    <div><div class="sb-logo-text">PropBot AI</div><div class="sb-logo-sub">AGENT PORTAL</div></div>
+  </div>
+  <div class="sb-nav">
+    <div class="sb-group-label">Main</div>
+    <div class="sb-item" onclick="location.href='/dashboard'"><div class="sb-icon">⚡</div>Dashboard</div>
+    <div class="sb-item" onclick="location.href='/dashboard'"><div class="sb-icon">👥</div>Leads</div>
+    <div class="sb-item active"><div class="sb-icon">📅</div>Site Visits<span class="sb-badge" id="pending-badge">0</span></div>
+    <div class="sb-group-label">Manage</div>
+    <div class="sb-item" onclick="location.href='/properties'"><div class="sb-icon">🏠</div>Properties</div>
+    <div class="sb-item"><div class="sb-icon">🔁</div>Follow-ups</div>
+    <div class="sb-group-label">Account</div>
+    <div class="sb-item"><div class="sb-icon">⚙️</div>Settings</div>
+    <div class="sb-item"><div class="sb-icon">💳</div>Billing</div>
+  </div>
+  <div class="sb-bottom">
+    <div class="sb-agent-card">
+      <div class="sb-avatar" id="sb-avatar">?</div>
+      <div><div class="sb-agent-name" id="sb-name">Loading...</div><div class="sb-agent-plan" id="sb-plan">PRO</div></div>
+    </div>
+    <button class="sb-logout" onclick="logout()">↩ Sign Out</button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="page-title"><div class="page-title-icon">📅</div>Site Visits</div>
+      <div class="page-sub" id="top-date">Loading...</div>
+    </div>
+    <div class="topbar-right">
+      <div class="ai-pill"><div class="ai-pill-dot"></div>AI Agent Online</div>
+      <button class="book-btn" onclick="openModal()">+ Book Visit</button>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-cell c-amber"><div class="stat-icon">⏳</div><div class="stat-info"><div class="stat-label">Pending</div><div class="stat-value" id="s-pending">—</div></div></div>
+    <div class="stat-cell c-green"><div class="stat-icon">✅</div><div class="stat-info"><div class="stat-label">Confirmed</div><div class="stat-value" id="s-confirmed">—</div></div></div>
+    <div class="stat-cell c-red"><div class="stat-icon">🔥</div><div class="stat-info"><div class="stat-label">Today</div><div class="stat-value" id="s-today">—</div></div></div>
+    <div class="stat-cell c-purple"><div class="stat-icon">🏆</div><div class="stat-info"><div class="stat-label">Completed</div><div class="stat-value" id="s-done">—</div></div></div>
+  </div>
+
+  <div class="filter-bar">
+    <button class="ftab active" onclick="filterVisits('all',this)">All <span class="ftab-count" id="fc-all">0</span></button>
+    <button class="ftab" onclick="filterVisits('pending',this)">⏳ Pending <span class="ftab-count" id="fc-pending">0</span></button>
+    <button class="ftab" onclick="filterVisits('confirmed',this)">✅ Confirmed <span class="ftab-count" id="fc-confirmed">0</span></button>
+    <button class="ftab" onclick="filterVisits('today',this)">🔥 Today <span class="ftab-count" id="fc-today">0</span></button>
+    <button class="ftab" onclick="filterVisits('done',this)">🏆 Done <span class="ftab-count" id="fc-done">0</span></button>
+    <button class="ftab" onclick="filterVisits('cancelled',this)">❌ Cancelled <span class="ftab-count" id="fc-cancelled">0</span></button>
+  </div>
+
+  <div class="visits-area" id="visits-area">
+    <div class="loading-wrap"><div class="spin"></div> Loading visits...</div>
+  </div>
+</div>
+
+<!-- BOOK VISIT MODAL -->
+<div class="overlay" id="modal" onclick="overlayClick(event,'modal')">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <div class="modal-title"><span class="modal-title-icon">📅</span><span id="modal-title-text">Book Site Visit</span></div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="msg-bar" id="modal-msg"></div>
+      <div class="fg-row">
+        <div class="fg"><label>Buyer Name</label><input type="text" id="v-name" placeholder="Suresh Patil"></div>
+        <div class="fg"><label>Buyer Phone</label><input type="tel" id="v-phone" placeholder="+91 98765 43210"></div>
+      </div>
+      <div class="fg"><label>Property</label><select id="v-property"><option value="">Select property...</option></select></div>
+      <div class="fg-row">
+        <div class="fg"><label>Visit Date</label><input type="date" id="v-date"></div>
+        <div class="fg"><label>Visit Time</label>
+          <select id="v-time">
+            <option value="09:00">9:00 AM</option><option value="10:00">10:00 AM</option>
+            <option value="11:00" selected>11:00 AM</option><option value="12:00">12:00 PM</option>
+            <option value="14:00">2:00 PM</option><option value="15:00">3:00 PM</option>
+            <option value="16:00">4:00 PM</option><option value="17:00">5:00 PM</option>
+            <option value="18:00">6:00 PM</option>
+          </select>
+        </div>
+      </div>
+      <div class="fg"><label>Notes (optional)</label><textarea id="v-notes" placeholder="Buyer wants east facing, needs parking..."></textarea></div>
+    </div>
+    <div class="modal-foot">
+      <button class="mbtn cancel" onclick="closeModal()">Cancel</button>
+      <button class="mbtn save" id="save-btn" onclick="saveVisit()">📅 Book Visit</button>
+    </div>
+  </div>
+</div>
+
+<!-- DETAIL PANEL -->
+<div class="detail-overlay" id="detail-overlay" onclick="overlayClick(event,'detail-overlay')">
+  <div class="detail-panel">
+    <div class="detail-hdr">
+      <div><div class="detail-hdr-title" id="d-title">Visit Details</div><div class="detail-hdr-sub" id="d-sub">—</div></div>
+      <button class="modal-close" onclick="closeDetail()">×</button>
+    </div>
+    <div class="detail-body" id="detail-body"></div>
+    <div class="detail-foot" id="detail-foot"></div>
+  </div>
+</div>
+
+<script src="/frontend/js/app.js"></script>
+<script src="/frontend/js/visits.js"></script>
+</body>
+</html>
