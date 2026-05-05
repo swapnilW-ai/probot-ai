@@ -92,201 +92,48 @@ Reply with your preferred time 👍`;
 // Handler
 module.exports = async function handler(req, res) {
 
-  if (req.method !== 'POST') {
-    return res.status(405).send('Method Not Allowed');
-  }
-  
-  //  Twilio signature validation
-  const signature = req.headers['x-twilio-signature'];
-
-  const isValid = twilio.validateRequest(
-    process.env.TWILIO_AUTH,
-    signature,
-    'https://probot-ai.vercel.app/api/webhook',
-    req.body
-  );
-
-  if (!isValid) {
-    return res.status(403).send('Invalid request');
-  }
-
-  // Input validation  
-  const incomingMsg = String(req.body.Body || '').trim();
-  const fromNumber  = String(req.body.From || '').trim();
-
-  if (!incomingMsg || !fromNumber) {
-    return res.status(400).send('Invalid payload');
-  }
-
-  if (incomingMsg.length > 300) {
-    return res.status(413).send('Message too long');
-  }
-
-  if (isRateLimited(fromNumber)) {
-    return res.status(429).send('Too many requests');
-  }
-
-  //dynamic booking
-  // 🔥 NEW (basic version)
-function extractDate(msg) {
-  const text = msg.toLowerCase();
-
-  if (text.includes("tomorrow")) {
-    const d = new Date();
-    d.setDate(d.getDate() + 1);
-    return d.toISOString().split("T")[0];
-  }
-
-  const d = new Date();
-  d.setDate(d.getDate() + 1);
-  return d.toISOString().split("T")[0];
-}
-//extract timer
-  function extractTime(msg) {
-  const text = msg.toLowerCase();
-
-  const match = text.match(/(\d{1,2})(:\d{2})?\s?(am|pm)?/);
-
-  if (!match) return null;
-
-  let hour = parseInt(match[1]);
-  const minutes = match[2] || ":00";
-  const ampm = match[3];
-
-  if (ampm === "pm" && hour < 12) hour += 12;
-  if (ampm === "am" && hour === 12) hour = 0;
-
-  return `${hour.toString().padStart(2, "0")}${minutes}`;
-}
-
-//check avaibility
-async function isSlotAvailable(agentId, date, time) {
-
-  const start = `${date}T${time}:00`;
-
-  const res = await fetch(
-    `${SUPABASE_URL}/rest/v1/visits?agent_id=eq.${agentId}&scheduled_at=eq.${start}&select=id`,
-    {
-      headers: {
-        apikey: SUPABASE_KEY,
-        Authorization: `Bearer ${SUPABASE_KEY}`,
-      }
-    }
-  );
-
-  const data = await res.json();
-
-  return data.length === 0;
-}
-
-async function createVisit(agent, msg, fromNumber) {
-
-  const date = extractDate(msg);
-  const time = extractTime(msg);
-
-  if (!time) return null;
-
-  // optional pre-check 
-  const available = await isSlotAvailable(agent.id, date, time);
-  if (!available) {
-    return `❌ This slot is already booked. Please choose another time.`;
-  }
-
-  const scheduled_at = `${date}T${time}:00`;
-
-  try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/visits`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        apikey: SUPABASE_KEY,
-        Authorization: `Bearer ${SUPABASE_KEY}`,
-        Prefer: "return=minimal"
-      },
-      body: JSON.stringify({
-        agent_id: agent.id,
-        buyer_name: "WhatsApp Lead",
-        buyer_phone: fromNumber.replace("whatsapp:", ""),
-        property: "TBD",
-        scheduled_at,
-        status: "pending",
-        booked_by: "ai"
-      })
-    });
-
-    // 🔥 IMPORTANT: handle DB constraint error
-    if (!res.ok) {
-      const err = await res.text();
-
-      if (err.includes("unique_agent_slot")) {
-        return "❌ This slot was just booked. Please choose another time.";
-      }
-
-      throw new Error(err);
-    }
-
-    return `✅ Visit booked for ${date} at ${time}`;
-
-  } catch (err) {
-    console.error("Booking error:", err);
-    return "❌ Unable to book visit. Please try again.";
-  }
-} 
-const agent = await getOrAssignAgent(fromNumber);
-
-const intent = detectVisitIntent(incomingMsg);
-
-if (intent === "confirm_visit") {
-  const response = await createVisit(agent, incomingMsg, fromNumber);
-  return res.status(200).send(response);
-}
-  //  re VISIT FLOW (slot suggestion etc.)
-const visitResponse = await handleVisitFlow(intent, incomingMsg, agent);
-
-if (visitResponse) {
-  return res.status(200).send(visitResponse);
-}
-
-// DEFAULT RESPONSE (VERY IMPORTANT)
-return res.status(200).send("Got it ");
-
-  const profileName = String(req.body.ProfileName || 'Buyer').slice(0, 50);
-
-  console.log(`📩 FROM: ${fromNumber} | MSG: ${incomingMsg}`);
-
   try {
 
-    // 🔥 ROUTING
-    //const agent = await getOrAssignAgent(fromNumber);
-    //console.log("Agent object:", agent);
+    if (req.method !== 'POST') {
+      return res.status(405).send('Method Not Allowed');
+    }
 
-    //////////////////////////////////////////////////////////
-    // 🔥 NEW: AI VISIT INTERCEPTION
-    //////////////////////////////////////////////////////////
+    const incomingMsg = String(req.body.Body || '').trim();
+    const fromNumber  = String(req.body.From || '').trim();
+    const profileName = String(req.body.ProfileName || 'Buyer').slice(0, 50);
+
+    if (!incomingMsg || !fromNumber) {
+      return res.status(400).send('Invalid payload');
+    }
+
+    if (isRateLimited(fromNumber)) {
+      return res.status(429).send('Too many requests');
+    }
+
+    // 🔥 GET AGENT
+    const agent = await getOrAssignAgent(fromNumber);
+
+    // 🔥 DETECT INTENT
     const intent = detectVisitIntent(incomingMsg);
+
+    // 🔥 BOOK VISIT
+    if (intent === "confirm_visit") {
+      const response = await createVisit(agent, incomingMsg, fromNumber);
+      return res.status(200).send(response);
+    }
+
+    // 🔥 VISIT FLOW (slot suggestion)
     const visitResponse = await handleVisitFlow(intent, incomingMsg, agent);
 
     if (visitResponse) {
-      await twilioClient.messages.create({
-        body: visitResponse,
-        from: TWILIO_WA_NUMBER,
-        to: fromNumber
-      });
-
-      await saveToSupabase(incomingMsg, visitResponse, fromNumber, profileName, agent?.id);
-
-      return res.status(200).send('<Response></Response>');
+      return res.status(200).send(visitResponse);
     }
 
-
+    // 🔥 AI FLOW
     const agentProperties = await getAgentProperties(agent?.id);
-    console.log(`🏠 Properties found: ${agentProperties.length}`);
-
     const agentPrompt = buildAgentPrompt(agent, agentProperties);
 
     const history = await getHistory(fromNumber, agent?.id);
-    console.log(`📚 History: ${history.length}`);
-
     history.push({ role: 'user', parts: [{ text: incomingMsg }] });
 
     const aiReply = await getGeminiReply(agentPrompt, history);
@@ -301,28 +148,14 @@ return res.status(200).send("Got it ");
 
     return res.status(200).send('<Response></Response>');
 
-  }
-  catch (err) {
-  console.error('❌ Error:', err);
-  return res.status(200).send('<Response></Response>');
-}
-  
-  
-//  NEW
-function formatTime(t) {
-  const [h, m] = t.split(":");
-  let hour = parseInt(h);
+  } catch (err) {
 
-  const ampm = hour >= 12 ? "PM" : "AM";
-  hour = hour % 12 || 12;
-
-  return `${hour}:${m} ${ampm}`;
-} 
-  catch (err) {
-    console.error('❌ Error:', err.message);
+    console.error('❌ Error:', err);
     return res.status(200).send('<Response></Response>');
+
   }
 };
+
 
 // 🔥 ROUTING FUNCTION (FIXED)
 async function getOrAssignAgent(fromNumber) {
