@@ -186,12 +186,52 @@ async function createVisit(agent, msg, fromNumber) {
 
   if (!time) return null;
 
+  // optional pre-check (UX)
   const available = await isSlotAvailable(agent.id, date, time);
-
   if (!available) {
     return `❌ This slot is already booked. Please choose another time.`;
   }
 
+  const scheduled_at = `${date}T${time}:00`;
+
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/visits`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`,
+        Prefer: "return=minimal"
+      },
+      body: JSON.stringify({
+        agent_id: agent.id,
+        buyer_name: "WhatsApp Lead",
+        buyer_phone: fromNumber.replace("whatsapp:", ""),
+        property: "TBD",
+        scheduled_at,
+        status: "pending",
+        booked_by: "ai"
+      })
+    });
+
+    // 🔥 IMPORTANT: handle DB constraint error
+    if (!res.ok) {
+      const err = await res.text();
+
+      if (err.includes("unique_agent_slot")) {
+        return "❌ This slot was just booked. Please choose another time.";
+      }
+
+      throw new Error(err);
+    }
+
+    return `✅ Visit booked for ${date} at ${time}`;
+
+  } catch (err) {
+    console.error("Booking error:", err);
+    return "❌ Unable to book visit. Please try again.";
+  }
+}
   const scheduled_at = `${date}T${time}:00`;
 
   await fetch(`${SUPABASE_URL}/rest/v1/visits`, {
