@@ -255,9 +255,9 @@ function formatTime(t) {
 
 
     //////////////////////////////////////////////////////////
-    // 🔥 NEW: AI VISIT INTERCEPTION
+    // 🔥 NEW: AI VISIT INTERCEPTION not in use
     //////////////////////////////////////////////////////////
-    const intent = detectVisitIntent(incomingMsg);
+    const Vintent = detectVisitIntent(incomingMsg);
     const visitResponse = await handleVisitFlow(intent);
 
     if (visitResponse) {
