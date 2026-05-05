@@ -251,6 +251,7 @@ async function createVisit(agent, msg, fromNumber) {
       booked_by: "ai"
     })
   });
+  const agent = await getOrAssignAgent(fromNumber);
 
   return `✅ Visit booked for ${date} at ${time}`;
 }
