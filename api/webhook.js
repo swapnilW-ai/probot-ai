@@ -192,7 +192,7 @@ async function createVisit(agent, msg, fromNumber) {
     return `❌ This slot is already booked. Please choose another time.`;
   }
 
-  const scheduled_at = new Date(`${date}T${time}:00`);
+  const scheduled_at = `${date}T${time}:00`;
 
   await fetch(`${SUPABASE_URL}/rest/v1/visits`, {
     method: "POST",
