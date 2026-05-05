@@ -74,8 +74,13 @@ Reply with your preferred time 👍`;
   }
 
   if (intent === "confirm_visit") {
-    return "✅ Your visit has been booked successfully!";
-  }
+
+  const bookingResponse = await createVisit(agent, incomingMsg, fromNumber);
+
+  if (bookingResponse) return bookingResponse;
+
+  return "Please provide a valid time (e.g., 3 PM)";
+}
 
   if (intent === "handover") {
     return "Connecting you with our agent for better assistance...";
@@ -136,6 +141,80 @@ function extractDate(msg) {
   d.setDate(d.getDate() + 1);
   return d.toISOString().split("T")[0];
 }
+//extract timer
+  function extractTime(msg) {
+  const text = msg.toLowerCase();
+
+  const match = text.match(/(\d{1,2})(:\d{2})?\s?(am|pm)?/);
+
+  if (!match) return null;
+
+  let hour = parseInt(match[1]);
+  const minutes = match[2] || ":00";
+  const ampm = match[3];
+
+  if (ampm === "pm" && hour < 12) hour += 12;
+  if (ampm === "am" && hour === 12) hour = 0;
+
+  return `${hour.toString().padStart(2, "0")}${minutes}`;
+}
+
+//check avaibility
+async function isSlotAvailable(agentId, date, time) {
+
+  const start = new Date(`${date}T${time}:00`).toISOString();
+
+  const res = await fetch(
+    `${SUPABASE_URL}/rest/v1/visits?agent_id=eq.${agentId}&scheduled_at=eq.${start}&select=id`,
+    {
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`,
+      }
+    }
+  );
+
+  const data = await res.json();
+
+  return data.length === 0;
+}
+
+async function createVisit(agent, msg, fromNumber) {
+
+  const date = extractDate(msg);
+  const time = extractTime(msg);
+
+  if (!time) return null;
+
+  const available = await isSlotAvailable(agent.id, date, time);
+
+  if (!available) {
+    return `❌ This slot is already booked. Please choose another time.`;
+  }
+
+  const scheduled_at = new Date(`${date}T${time}:00`);
+
+  await fetch(`${SUPABASE_URL}/rest/v1/visits`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      apikey: SUPABASE_KEY,
+      Authorization: `Bearer ${SUPABASE_KEY}`,
+    },
+    body: JSON.stringify({
+      agent_id: agent.id,
+      buyer_name: "WhatsApp Lead",
+      buyer_phone: fromNumber.replace("whatsapp:", ""),
+      property: "TBD",
+      scheduled_at,
+      status: "pending",
+      booked_by: "ai"
+    })
+  });
+
+  return `✅ Visit booked for ${date} at ${time}`;
+}
+  
 // 🔥 NEW
 function formatTime(t) {
   const [h, m] = t.split(":");
