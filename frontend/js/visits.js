@@ -78,11 +78,20 @@ function updateStats() {
   const today = allVisits.filter(v =>
     v.scheduled_at && v.scheduled_at.startsWith(todayStr)
   ).length;
+  const setText = (id, value) => {
+  const el = document.getElementById(id);
+  if (el) el.textContent = value;
+};
 
-  document.getElementById("stat-pending").textContent = pending;
-  document.getElementById("stat-confirmed").textContent = confirmed;
-  document.getElementById("stat-done").textContent = done;
-  document.getElementById("stat-today").textContent = today;
+setText("s-pending", pending);
+setText("s-confirmed", confirmed);
+setText("s-done", done);
+setText("s-today", today);
+
+  //document.getElementById("stat-pending").textContent = pending;
+  //document.getElementById("stat-confirmed").textContent = confirmed;
+  //document.getElementById("stat-done").textContent = done;
+  //document.getElementById("stat-today").textContent = today;
 }
 // ── TAB COUNTS ────────────────────────────────
 function updateTabCounts() {
