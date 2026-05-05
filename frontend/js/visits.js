@@ -67,19 +67,23 @@ async function loadProps() {
 
 // ── STATS ─────────────────────────────────────
 function updateStats() {
-  const tod = new Date().toDateString();
+  // Get today in LOCAL timezone (important)
+  const now = new Date();
+  const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+
   const pending   = allVisits.filter(v => v.status === 'pending').length;
   const confirmed = allVisits.filter(v => v.status === 'confirmed').length;
   const done      = allVisits.filter(v => v.status === 'done').length;
-  const today     = allVisits.filter(v => v.scheduled_at && new Date(v.scheduled_at.slice(11, 16)).toDateString() === tod).length;
-  //const time = v.scheduled_at.slice(11, 16);
-  document.getElementById('s-pending').textContent   = pending;
-  document.getElementById('s-confirmed').textContent = confirmed;
-  document.getElementById('s-today').textContent     = today;
-  document.getElementById('s-done').textContent      = done;
-  document.getElementById('pending-badge').textContent = pending;
-}
 
+  const today = allVisits.filter(v =>
+    v.scheduled_at && v.scheduled_at.startsWith(todayStr)
+  ).length;
+
+  document.getElementById("stat-pending").textContent = pending;
+  document.getElementById("stat-confirmed").textContent = confirmed;
+  document.getElementById("stat-done").textContent = done;
+  document.getElementById("stat-today").textContent = today;
+}
 // ── TAB COUNTS ────────────────────────────────
 function updateTabCounts() {
   const tod = new Date().toDateString();
