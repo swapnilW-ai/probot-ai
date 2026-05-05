@@ -186,7 +186,7 @@ async function createVisit(agent, msg, fromNumber) {
 
   if (!time) return null;
 
-  // optional pre-check (UX)
+  // optional pre-check 
   const available = await isSlotAvailable(agent.id, date, time);
   if (!available) {
     return `❌ This slot is already booked. Please choose another time.`;
@@ -249,19 +249,7 @@ if (visitResponse) {
 
 // DEFAULT RESPONSE (VERY IMPORTANT)
 return res.status(200).send("Got it ");
-}
-  
-  
-//  NEW
-function formatTime(t) {
-  const [h, m] = t.split(":");
-  let hour = parseInt(h);
 
-  const ampm = hour >= 12 ? "PM" : "AM";
-  hour = hour % 12 || 12;
-
-  return `${hour}:${m} ${ampm}`;
-}
   const profileName = String(req.body.ProfileName || 'Buyer').slice(0, 50);
 
   console.log(`📩 FROM: ${fromNumber} | MSG: ${incomingMsg}`);
@@ -313,7 +301,20 @@ function formatTime(t) {
 
     return res.status(200).send('<Response></Response>');
 
-  } catch (err) {
+  }
+  
+  
+//  NEW
+function formatTime(t) {
+  const [h, m] = t.split(":");
+  let hour = parseInt(h);
+
+  const ampm = hour >= 12 ? "PM" : "AM";
+  hour = hour % 12 || 12;
+
+  return `${hour}:${m} ${ampm}`;
+} 
+  catch (err) {
     console.error('❌ Error:', err.message);
     return res.status(200).send('<Response></Response>');
   }
