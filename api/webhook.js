@@ -273,8 +273,8 @@ function formatTime(t) {
   try {
 
     // 🔥 ROUTING
-    const agent = await getOrAssignAgent(fromNumber);
-    console.log("Agent object:", agent);
+    //const agent = await getOrAssignAgent(fromNumber);
+    //console.log("Agent object:", agent);
 
     //////////////////////////////////////////////////////////
     // 🔥 NEW: AI VISIT INTERCEPTION
