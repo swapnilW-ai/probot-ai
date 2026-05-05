@@ -162,7 +162,7 @@ function extractDate(msg) {
 //check avaibility
 async function isSlotAvailable(agentId, date, time) {
 
-  const start = new Date(`${date}T${time}:00`).toISOString();
+  const start = `${date}T${time}:00`;
 
   const res = await fetch(
     `${SUPABASE_URL}/rest/v1/visits?agent_id=eq.${agentId}&scheduled_at=eq.${start}&select=id`,
@@ -231,32 +231,28 @@ async function createVisit(agent, msg, fromNumber) {
     console.error("Booking error:", err);
     return "❌ Unable to book visit. Please try again.";
   }
+} 
+const agent = await getOrAssignAgent(fromNumber);
+
+const intent = detectVisitIntent(incomingMsg);
+
+if (intent === "confirm_visit") {
+  const response = await createVisit(agent, incomingMsg, fromNumber);
+  return res.status(200).send(response);
 }
-  const scheduled_at = `${date}T${time}:00`;
+  //  re VISIT FLOW (slot suggestion etc.)
+const visitResponse = await handleVisitFlow(intent, incomingMsg, agent);
 
-  await fetch(`${SUPABASE_URL}/rest/v1/visits`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      apikey: SUPABASE_KEY,
-      Authorization: `Bearer ${SUPABASE_KEY}`,
-    },
-    body: JSON.stringify({
-      agent_id: agent.id,
-      buyer_name: "WhatsApp Lead",
-      buyer_phone: fromNumber.replace("whatsapp:", ""),
-      property: "TBD",
-      scheduled_at,
-      status: "pending",
-      booked_by: "ai"
-    })
-  });
-  const agent = await getOrAssignAgent(fromNumber);
+if (visitResponse) {
+  return res.status(200).send(visitResponse);
+}
 
-  return `✅ Visit booked for ${date} at ${time}`;
+// DEFAULT RESPONSE (VERY IMPORTANT)
+return res.status(200).send("Got it ");
 }
   
-// 🔥 NEW
+  
+//  NEW
 function formatTime(t) {
   const [h, m] = t.split(":");
   let hour = parseInt(h);
