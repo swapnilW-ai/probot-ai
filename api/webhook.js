@@ -254,25 +254,6 @@ function formatTime(t) {
     }
 
 
-    //////////////////////////////////////////////////////////
-    // 🔥 NEW: AI VISIT INTERCEPTION not in use
-    //////////////////////////////////////////////////////////
-    const Vintent = detectVisitIntent(incomingMsg);
-    const visitResponse = await handleVisitFlow(intent);
-
-    if (visitResponse) {
-      await twilioClient.messages.create({
-        body: visitResponse,
-        from: TWILIO_WA_NUMBER,
-        to: fromNumber
-      });
-
-      await saveToSupabase(incomingMsg, visitResponse, fromNumber, profileName, agent?.id);
-
-      return res.status(200).send('<Response></Response>');
-    }
-
-
     const agentProperties = await getAgentProperties(agent?.id);
     console.log(`🏠 Properties found: ${agentProperties.length}`);
 
