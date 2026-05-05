@@ -71,8 +71,8 @@ function updateStats() {
   const pending   = allVisits.filter(v => v.status === 'pending').length;
   const confirmed = allVisits.filter(v => v.status === 'confirmed').length;
   const done      = allVisits.filter(v => v.status === 'done').length;
-  const today     = allVisits.filter(v => v.scheduled_at && new Date(v.scheduled_at).toDateString() === tod).length;
-
+ // const today     = allVisits.filter(v => v.scheduled_at && new Date(v.scheduled_at).toDateString() === tod).length;
+  const time = v.scheduled_at.slice(11, 16);
   document.getElementById('s-pending').textContent   = pending;
   document.getElementById('s-confirmed').textContent = confirmed;
   document.getElementById('s-today').textContent     = today;
