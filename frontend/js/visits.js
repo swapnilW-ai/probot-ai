@@ -265,7 +265,7 @@ async function saveVisit() {
       if (error) throw error;
       showMsg('✅ Visit updated!', 'success');
     } 
-    else const { error } = await db.from('visits').insert([payload]);
+    else { const { error } = await db.from('visits').insert([payload])};
 
 if (error) {
 
