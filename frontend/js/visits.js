@@ -260,39 +260,57 @@ async function saveVisit() {
   };
 
   try {
-    if (editingId) {
-      const { error } = await db.from('visits').update(payload).eq('id', editingId);
-      if (error) throw error;
-      showMsg('✅ Visit updated!', 'success');
-    } 
-    else { const { error } = await db.from('visits').insert([payload])};
 
-if (error) {
+  if (editingId) {
 
-  console.error("VISIT INSERT ERROR:", error);
+    const { error } = await db
+      .from('visits')
+      .update(payload)
+      .eq('id', editingId);
 
-  // 🔥 Duplicate slot protection
-  if (
-    error.message?.toLowerCase().includes("duplicate") ||
-    error.message?.toLowerCase().includes("unique_agent_slot")
-  ) {
-    showMsg('❌ This slot is already booked. Please choose another slot.', 'error');
-    return;
+    if (error) throw error;
+
+    showMsg('✅ Visit updated!', 'success');
+
+  } else {
+
+    const { error } = await db
+      .from('visits')
+      .insert([payload]);
+
+    if (error) {
+
+      console.error("VISIT INSERT ERROR:", error);
+
+      // 🔥 Duplicate slot protection
+      if (
+        error.message?.toLowerCase().includes("duplicate") ||
+        error.message?.toLowerCase().includes("unique_agent_slot")
+      ) {
+        showMsg(
+          '❌ This slot is already booked. Please choose another slot.',
+          'error'
+        );
+        return;
+      }
+
+      showMsg('❌ Unable to book visit.', 'error');
+      return;
+    }
+
+    showMsg('✅ Visit booked successfully!', 'success');
   }
 
-  showMsg('❌ Unable to book visit.', 'error');
-  return;
+  await loadVisits();
+  setTimeout(closeModal, 1000);
+
+} catch (e) {
+
+  console.error(e);
+
+  showMsg('❌ Something went wrong.', 'error');
+
 }
-
-showMsg('✅ Visit booked successfully!', 'success');
-    await loadVisits();
-    setTimeout(closeModal, 1000);
-  } catch(e) { showMsg(e.message, 'error'); }
-
-  btn.disabled = false;
-  btn.textContent = '📅 Book Visit';
-}
-
 // ── EDIT ──────────────────────────────────────
 function editVisit(id) {
   const v = allVisits.find(x => x.id === id);
