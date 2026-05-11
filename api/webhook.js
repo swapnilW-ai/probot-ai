@@ -40,9 +40,13 @@ function detectVisitIntent(msg) {
     return "schedule_visit";
   }
 
-  if (text.includes("confirm") || text.includes("book")) {
-    return "confirm_visit";
-  }
+  if (
+  text.includes("confirm") ||
+  text.includes("book") ||
+  text.match(/\d{1,2}(:\d{2})?\s?(am|pm)?/)
+    ) {
+        return "confirm_visit";
+      }
 
   if (text.includes("price") || text.includes("negotiat")) {
     return "handover";
@@ -50,7 +54,67 @@ function detectVisitIntent(msg) {
 
   return "normal";
 }
+//////////////////////////////////////////////////////////
+// 🔥 NEW: CREATE VISIT
+//////////////////////////////////////////////////////////
+async function createVisit(agent, msg, fromNumber) {
 
+  const date = extractDate(msg);
+  const time = extractTime(msg);
+
+  if (!time) {
+    return "Please provide a valid time (e.g., 3 PM)";
+  }
+
+  const scheduled_at = `${date}T${time}:00`;
+
+  try {
+
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/visits`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`,
+        Prefer: "return=minimal"
+      },
+      body: JSON.stringify({
+        agent_id: agent.id,
+        buyer_name: "WhatsApp Lead",
+        buyer_phone: fromNumber.replace("whatsapp:", ""),
+        property: "TBD",
+        scheduled_at,
+        status: "pending",
+        booked_by: "ai"
+      })
+    });
+
+    // 🔥 HANDLE DUPLICATE SLOT
+    if (!res.ok) {
+
+      const errText = await res.text();
+
+      console.error("DB ERROR:", errText);
+
+      if (
+        errText.toLowerCase().includes("duplicate") ||
+        errText.toLowerCase().includes("unique_agent_slot")
+      ) {
+        return "❌ This slot is already booked. Please try another slot.";
+      }
+
+      return "❌ Unable to book visit right now.";
+    }
+
+    return `✅ Site visit booked for ${date} at ${formatTime(time)} 🎉`;
+
+  } catch (err) {
+
+    console.error("Booking Error:", err);
+
+    return "❌ Something went wrong while booking the visit.";
+  }
+}
 //////////////////////////////////////////////////////////
 // 🔥 NEW: VISIT FLOW HANDLER
 //////////////////////////////////////////////////////////
@@ -121,7 +185,7 @@ module.exports = async function handler(req, res) {
       //const response = await createVisit(agent, incomingMsg, fromNumber);
       //return res.status(200).send(response);
     //
-  }
+  //}
 
     // 🔥 VISIT FLOW (slot suggestion)
     const visitResponse = await handleVisitFlow(intent, incomingMsg, agent,fromNumber);
