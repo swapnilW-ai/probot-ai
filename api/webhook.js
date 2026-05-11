@@ -117,10 +117,11 @@ module.exports = async function handler(req, res) {
     const intent = detectVisitIntent(incomingMsg);
 
     // 🔥 BOOK VISIT
-    if (intent === "confirm_visit") {
-      const response = await createVisit(agent, incomingMsg, fromNumber);
-      return res.status(200).send(response);
-    }
+    //if (intent === "confirm_visit") {
+      //const response = await createVisit(agent, incomingMsg, fromNumber);
+      //return res.status(200).send(response);
+    //
+  }
 
     // 🔥 VISIT FLOW (slot suggestion)
     const visitResponse = await handleVisitFlow(intent, incomingMsg, agent,fromNumber);
