@@ -54,7 +54,7 @@ function detectVisitIntent(msg) {
 //////////////////////////////////////////////////////////
 // 🔥 NEW: VISIT FLOW HANDLER
 //////////////////////////////////////////////////////////
-async function handleVisitFlow(intent, incomingMsg, agent) {
+async function handleVisitFlow(intent, incomingMsg, agent,fromNumber) {
 
   if (intent === "schedule_visit") {
 
@@ -123,7 +123,7 @@ module.exports = async function handler(req, res) {
     }
 
     // 🔥 VISIT FLOW (slot suggestion)
-    const visitResponse = await handleVisitFlow(intent, incomingMsg, agent);
+    const visitResponse = await handleVisitFlow(intent, incomingMsg, agent,fromNumber);
 
     if (visitResponse) {
       return res.status(200).send(visitResponse);
