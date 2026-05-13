@@ -3,7 +3,7 @@
 html, body { height: 100%; overflow: hidden; }
 
 body {
-  font-family: 'Outfit', sans-serif;
+  font-family: 'Outfit', Arial;
   background: #080809;
   color: #e8e6e0;
   display: flex;
