@@ -343,7 +343,7 @@ function openModal() {
   clearForm();
   const btn = document.getElementById('save-btn');
   btn.disabled = false;
-  btn.textContent = '📅 Book Visit';
+  btn.textContent = 'save';
 
   document.getElementById('modal').classList.add('open');
 }
