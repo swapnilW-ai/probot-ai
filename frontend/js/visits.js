@@ -313,8 +313,13 @@ async function saveVisit() {
 
 } finally {
 
+  const btn = document.getElementById('save-btn');
+
   btn.disabled = false;
-  btn.textContent = '📅 Book Visit';
+
+  btn.textContent = editingId
+    ? 'Update Visit'
+    : 'Save';
 
 }
 }
