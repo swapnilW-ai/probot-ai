@@ -421,5 +421,25 @@ async function saveToSupabase(userMsg, aiReply, fromNumber, profileName, agentId
       ])
     });
   }
+  //chat route
+import { processAI } from "./ai.js";
+app.post('/webhook', async (req, res) => {
+
+  const userMessage =
+    req.body.message;
+
+  // AI analysis
+  const aiResult =
+    await processAI(userMessage);
+  console.log(aiResult);
+
+  // save conversation
+  // create followup
+  // notify agent
+  // etc
+
+  res.sendStatus(200);
+
+});
 }
 
