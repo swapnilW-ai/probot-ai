@@ -2,6 +2,35 @@
   <div class="modal-content">
 
     <h2>Add Follow-Up</h2>
+    <!-- ═══ DASHBOARD ═══ -->
+<div class="dashboard" id="dashboard">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sb-logo"><div class="sb-dot"></div>PropBot AI</div>
+    <div class="sb-section">Main</div>
+    <div class="sb-item active" onclick="location.href='/portal'">⚡ Dashboard <span class="sb-badge" id="hot-badge">0</span></div>
+    <div class="sb-item">💬 Conversations</div>
+    <div class="sb-item">👥 All Leads</div>
+    <div class="sb-section">Manage</div>
+    <div class="sb-item" onclick="location.href='/properties'">🏠 My Properties</div>
+    <div class="sb-item" onclick="location.href='/visits'">📅 Site Visits</div>
+    <div class="sb-item" onclick="location.href='/followupModal'">📅 Follow-ups</div>
+    <div class="sb-section">Account</div>
+    <div class="sb-item">⚙️ Settings</div>
+    <div class="sb-item">💳 Billing</div>
+    <div class="sb-bottom">
+      <div class="sb-agent">
+        <div class="sb-avatar" id="sb-avatar">?</div>
+        <div>
+          <div class="sb-name" id="sb-name">Loading...</div>
+          <div class="sb-plan" id="sb-plan">PRO · Trial</div>
+        </div>
+      </div>
+      <button class="sb-logout" onclick="handleLogout()">↩ Logout</button>
+    </div>
+  </div>
+
 
     <input type="date" id="followupDate">
 
