@@ -311,9 +311,12 @@ async function saveVisit() {
 
   showMsg('❌ Something went wrong.', 'error');
 
-}  
+} finally {
+
   btn.disabled = false;
   btn.textContent = '📅 Book Visit';
+
+}
 }
 // ── EDIT ──────────────────────────────────────
 function editVisit(id) {
@@ -338,6 +341,10 @@ function openModal() {
   editingId = null;
   document.getElementById('modal-title-text').textContent = 'Book Site Visit';
   clearForm();
+  const btn = document.getElementById('save-btn');
+  btn.disabled = false;
+  btn.textContent = '📅 Book Visit';
+
   document.getElementById('modal').classList.add('open');
 }
 
