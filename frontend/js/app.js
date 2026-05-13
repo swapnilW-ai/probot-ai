@@ -5,6 +5,15 @@ window.db = createClient(
   'sb_publishable_MDKa6Y4VCUoVA_UeBdaQ8w_93qDws5E'
 );
 
+const routes = {
+  dashboard: '/portal',
+  conversations: '/conversation',
+  leads: '/all-leads',
+  followups: '/followups',
+  visits: '/site-visits',
+  billing: '/billing',
+  settings: '/settings'
+};
 window.currentAgent = null;
 
 window.initApp = async function () {
