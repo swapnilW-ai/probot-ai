@@ -284,6 +284,7 @@ async function saveVisit() {
 
       // 🔥 Duplicate slot protection
       if (
+        error.code === '23505' ||
         error.message?.toLowerCase().includes("duplicate") ||
         error.message?.toLowerCase().includes("unique_agent_slot")
       ) {
