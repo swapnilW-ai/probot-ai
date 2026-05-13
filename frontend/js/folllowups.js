@@ -164,3 +164,28 @@ function renderFollowups(followups) {
   });
 
 }
+
+//check due
+function checkDueFollowups(
+  followups
+) {
+
+  const now = new Date();
+
+  followups.forEach(item => {
+
+    const due =
+      new Date(
+        `${item.followup_date}
+         ${item.followup_time}`
+      );
+
+    if (
+      item.status === 'pending' &&
+      due <= now
+    ) {
+
+      showReminderPopup(item);
+    }
+  });
+}
