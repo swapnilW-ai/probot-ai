@@ -1,83 +1,210 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
   <meta charset="UTF-8">
-
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Follow-Ups</title>
 
-  <link
-    rel="stylesheet"
-    href="/frontend/styles/followups.css"
-  >
+  <link rel="stylesheet" href="/frontend/styles/followups.css">
 
 </head>
-
 <body>
-<!-- SIDEBAR -->
+
+  <!-- SIDEBAR -->
   <div class="sidebar">
-    <div class="sb-logo"><div class="sb-dot"></div>PropBot AI</div>
+    <div class="sb-logo">
+      <div class="sb-dot"></div>
+      PropBot AI
+    </div>
     <div class="sb-section">Main</div>
-    <div class="sb-item active" onclick="location.href='/portal'">⚡ Dashboard <span class="sb-badge" id="hot-badge">0</span></div>
-    <div class="sb-item">💬 Conversations</div>
-    <div class="sb-item">👥 All Leads</div>
-    <div class="sb-section">Manage</div>
-    <div class="sb-item" onclick="location.href='/properties'">🏠 My Properties</div>
-    <div class="sb-item" onclick="location.href='/visits'">📅 Site Visits</div>
-    <div class="sb-item" onclick="location.href='/followupModal'">📅 Follow-ups</div>
-    <div class="sb-section">Account</div>
-    <div class="sb-item">⚙️ Settings</div>
-    <div class="sb-item">💳 Billing</div>
-    <div class="sb-bottom">
-      <div class="sb-agent">
-        <div class="sb-avatar" id="sb-avatar">?</div>
-        <div>
-          <div class="sb-name" id="sb-name">Loading...</div>
-          <div class="sb-plan" id="sb-plan">PRO · Trial</div>
+    <div class="sb-item" onclick="location.href='/portal'">⚡ Dashboard </div>
+    <div class="sb-item"> 💬 Conversations </div>
+    <div class="sb-item">👥 All Leads </div>
+
+    <div class="sb-section"> Manage </div>
+    <div class="sb-item" onclick="location.href='/properties'" > 🏠 My Properties </div>
+    <div class="sb-item" onclick="location.href='/visits'" > 📅 Site Visits </div>
+    <div class="sb-item active" onclick="location.href='/followups'" > 🔔 Follow-Ups </div>
+    
+    <div class="sb-section"> Account </div>
+    <div class="sb-item">⚙️ Settings </div>
+    <div class="sb-item"> 💳 Billing </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div>
+
+        <div class="page-title">
+          🔔 Follow-Up Management
         </div>
+
+        <div class="page-sub">
+          AI Powered CRM Automation
+        </div>
+
       </div>
-      <button class="sb-logout" onclick="handleLogout()">↩ Logout</button>
+
+      <button
+        class="book-btn"
+        onclick="openFollowupModal()"
+      >
+        + Add Follow-Up
+      </button>
+
+    </div>
+
+    <!-- FILTER BAR -->
+    <div class="filter-bar">
+
+      <button class="ftab active">
+        Today
+      </button>
+
+      <button class="ftab">
+        Upcoming
+      </button>
+
+      <button class="ftab">
+        Completed
+      </button>
+
+      <button class="ftab">
+        Missed
+      </button>
+
+    </div>
+
+    <!-- FOLLOWUPS AREA -->
+    <div class="followups-area">
+      <div id="followupsContainer">
+      </div>
     </div>
   </div>
+  <!-- FOLLOWUP MODAL -->
+  <div id="followupModal" class="overlay" >
+  <div class="modal-box">
+      <!-- HEADER -->
+      <div class="modal-hdr">
+        <div class="modal-title">
+          🔔 Add Follow-Up
+        </div>
+        <button class="modal-close" onclick="closeFollowupModal()" > × </button>
+      </div>
+      <!-- BODY -->
+      <div class="modal-body">
+        <div class="fg">
+          <label>
+            Follow-Up Date
+          </label>
+          <input type="date" id="followupDate">
+        </div>
+        <div class="fg">
+          <label>
+            Follow-Up Time
+          </label>
+          <input type="time" id="followupTime" >
+        </div>
+        <div class="fg">
+          <label>
+            Follow-Up Type
+          </label>
+          <select id="followupType">
+            <option>
+              Call Back
+            </option>
+            <option>
+              Site Visit
+            </option>
 
-</body>
-</html>
-<div id="followupModal" class="modal hidden">
-  <div class="modal-content">
+            <option>
+              Price Negotiation
+            </option>
 
-    <h2>Add Follow-Up</h2>
-    <!-- ═══ DASHBOARD ═══ -->
-<div class="dashboard" id="dashboard">
+            <option>
+              Payment Reminder
+            </option>
 
-    <input type="date" id="followupDate">
+            <option>
+              General Follow-Up
+            </option>
 
-    <input type="time" id="followupTime">
+          </select>
 
-    <select id="followupType">
-      <option>Call Back</option>
-      <option>Site Visit</option>
-      <option>Price Negotiation</option>
-      <option>Payment Reminder</option>
-      <option>General Follow-Up</option>
-    </select>
+        </div>
 
-    <select id="followupPriority">
-      <option value="low">Low</option>
-      <option value="medium">Medium</option>
-      <option value="high">High</option>
-    </select>
+        <div class="fg">
 
-    <textarea id="followupNote"></textarea>
+          <label>
+            Priority
+          </label>
 
-    <button id="saveFollowupBtn">
-      Save Follow-Up
-    </button>
+          <select id="followupPriority">
+
+            <option value="low">
+              Low
+            </option>
+
+            <option value="medium">
+              Medium
+            </option>
+
+            <option value="high">
+              High
+            </option>
+
+          </select>
+
+        </div>
+
+        <div class="fg">
+
+          <label>
+            Notes
+          </label>
+
+          <textarea
+            id="followupNote"
+            placeholder="Enter follow-up notes..."
+          ></textarea>
+
+        </div>
+
+      </div>
+
+      <!-- FOOTER -->
+      <div class="modal-foot">
+
+        <button
+          class="mbtn cancel"
+          onclick="closeFollowupModal()"
+        >
+          Cancel
+        </button>
+
+        <button
+          class="mbtn save"
+          id="saveFollowupBtn"
+        >
+          Save Follow-Up
+        </button>
+
+      </div>
+
+    </div>
 
   </div>
-</div>
+
+  <!-- SCRIPTS -->
+
+  <script src="/frontend/js/app.js"></script>
+
+  <script src="/frontend/js/followupService.js"></script>
+
+  <script src="/frontend/js/followups.js"></script>
+
+</body>
+
+</html>
