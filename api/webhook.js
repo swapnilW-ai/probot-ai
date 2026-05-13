@@ -422,24 +422,55 @@ async function saveToSupabase(userMsg, aiReply, fromNumber, profileName, agentId
     });
   }
   //chat route
+// api/webhook.js
+
 import { processAI } from "./ai.js";
-app.post('/webhook', async (req, res) => {
 
-  const userMessage =
-    req.body.message;
+export default async function handler(req, res) {
 
-  // AI analysis
-  const aiResult =
-    await processAI(userMessage);
-  console.log(aiResult);
+  try {
 
-  // save conversation
-  // create followup
-  // notify agent
-  // etc
+    const body = req.body;
 
-  res.sendStatus(200);
+    const userMessage =
+      body.message || '';
 
-});
+    // AI PROCESSING
+    const aiResult =
+      await processAI(userMessage);
+
+    console.log(
+      "AI RESULT:",
+      aiResult
+    );
+
+    // ------------------------
+    // FUTURE AUTOMATION LOGIC
+    // ------------------------
+
+    // save conversation
+
+    // create followup
+
+    // notify agent
+
+    // trigger site visit
+
+    // etc...
+
+    return res.status(200).json({
+      success: true,
+      ai: aiResult
+    });
+
+  } catch (err) {
+
+    console.error(err);
+
+    return res.status(500).json({
+      error: err.message
+    });
+  }
+}
 }
 
