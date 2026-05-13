@@ -310,7 +310,8 @@ async function saveVisit() {
 
   showMsg('❌ Something went wrong.', 'error');
 
-}  btn.disabled = false;
+}  
+  btn.disabled = false;
   btn.textContent = '📅 Book Visit';
 }
 // ── EDIT ──────────────────────────────────────
