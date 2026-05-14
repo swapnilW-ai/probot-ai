@@ -698,7 +698,51 @@ body{
 
 .modal-btn.save{
 
-  background:var(--green);
+  background:var(--orange);
 
   color:#fff;
+}
+/* DARK MODE PATCH */
+
+body {
+  background:#0c0c0d;
+}
+
+.topbar {
+  background:#111214;
+}
+
+.sidebar {
+  background:#111214;
+}
+
+.ps-card,
+.prop-card {
+  background:#15171a;
+  border-color:#262a30;
+}
+
+.ps-label,
+.prop-area,
+.prop-desc,
+.page-sub {
+  color:#8b949e;
+}
+
+.ps-num,
+.page-title,
+.prop-location {
+  color:#fff;
+}
+
+.prop-action {
+  background:#1d2127;
+  color:#fff;
+  border-color:#262a30;
+}
+
+.prop-tag {
+  background:#1d2127;
+  color:#ccc;
+  border-color:#262a30;
 }
