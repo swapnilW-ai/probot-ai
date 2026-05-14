@@ -18,50 +18,72 @@ const routes = {
 
 // ── GLOBALS ───────
 window.currentAgent = null;
-
 // ── INIT APP ─────────
+
 window.initApp = async function () {
 
-  const { data: { session } } = await db.auth.getSession();
- // No session
-  if (!session) {
-    window.location.href = "/frontend/pages/agent-portal.html";
-    return;
-  }
+  try {
 
-  const user = session.user;
-// Load agent profile
-  const { data } = await db
-    .from('agents')
-    .select('*')
-    .eq('id', user.id)
-    .single();
-  if (error) {
+    const {
+      data: { session }
+    } = await db.auth.getSession();
+
+    // No session
+    if (!session) {
+
+      window.location.href =
+        "/frontend/pages/agent-portal.html";
+
+      return;
+    }
+
+    const user = session.user;
+
+    // Load agent profile
+
+    const {
+      data,
+      error
+    } = await db
+      .from('agents')
+      .select('*')
+      .eq('id', user.id)
+      .single();
+
+    if (error) {
 
       console.error(
         'Agent fetch error:',
         error.message
       );
     }
-  
-  window.currentAgent = data || {
-    id: user.id,
-    name: user.email,
-    city: "Nashik",
-    plan: "free"
-  };
-};
-console.log(
-    '✅ Agent loaded:',
+
+    window.currentAgent =
+      data || {
+
+        id: user.id,
+
+        name: user.email,
+
+        city: "Nashik",
+
+        plan: "free"
+      };
+
+    console.log(
+      '✅ Agent loaded:',
       window.currentAgent
     );
+
     return window.currentAgent;
 
   } catch (err) {
+
     console.error(
       'initApp error:',
       err.message
     );
+
     return null;
   }
 };
