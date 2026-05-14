@@ -1,4 +1,4 @@
-<style>
+
   :root {
     --bg:#f8f6f1;--black:#111;--white:#fff;
     --green:#16a34a;--green-light:#22c55e;--green-pale:#dcfce7;
@@ -135,4 +135,4 @@ select:disabled {
   background: #f3f4f6;
   cursor: not-allowed;
 }
-</style>
+
