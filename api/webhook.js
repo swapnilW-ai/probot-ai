@@ -201,8 +201,34 @@ module.exports = async function handler(req, res) {
     const history = await getHistory(fromNumber, agent?.id);
     history.push({ role: 'user', parts: [{ text: incomingMsg }] });
 
-    const aiReply = await getGeminiReply(agentPrompt, history);
+// ─────────────────────────────────────────────
+// 🔥 NEW: AI FOLLOW-UP DECISION
+// ─────────────────────────────────────────────
 
+  const aiDecision =
+  await processAI(incomingMsg);
+
+  console.log(
+    'AI FOLLOWUP:',
+  aiDecision
+);
+
+// AUTO CREATE FOLLOWUP
+
+if (
+  aiDecision.should_schedule_followup
+) {
+
+  await createAIFollowup({
+    agent_id: agent?.id,  phone:
+      fromNumber.replace(
+        'whatsapp:',
+        ''
+      ),
+    ai: aiDecision
+  });
+}
+    const aiReply = await getGeminiReply(agentPrompt, history);
     await twilioClient.messages.create({
       body: aiReply,
       from: TWILIO_WA_NUMBER,
@@ -383,7 +409,235 @@ async function getGeminiReply(systemPrompt, history) {
 
   return data.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, try again.";
 }
+// ─────────────────────────────────────────────
+// 🔥 NEW: AI FOLLOW-UP ENGINE
+// ─────────────────────────────────────────────
 
+async function processAI(message) {
+
+  const lower =
+    message.toLowerCase();
+
+  let intent = 'general';
+
+  let priority = 'medium';
+
+  let followupType =
+    'General Follow-Up';
+
+  let nextHours = 24;
+
+  let shouldSchedule = false;
+
+  // VISIT
+  if (
+    lower.includes('visit') ||
+    lower.includes('site visit')
+  ) {
+
+    intent = 'schedule_visit';
+
+    priority = 'high';
+
+    followupType =
+      'Site Visit';
+
+    nextHours = 12;
+
+    shouldSchedule = true;
+  }
+
+  // PRICE
+  if (
+    lower.includes('price') ||
+    lower.includes('budget')
+  ) {
+
+    intent = 'pricing';
+
+    priority = 'high';
+
+    followupType =
+      'Price Negotiation';
+
+    nextHours = 6;
+
+    shouldSchedule = true;
+  }
+
+  // CALLBACK
+  if (
+    lower.includes('call me') ||
+    lower.includes('callback')
+  ) {
+
+    intent = 'callback_request';
+
+    priority = 'medium';
+
+    followupType =
+      'Call Back';
+
+    nextHours = 2;
+
+    shouldSchedule = true;
+  }
+
+  return {
+
+    intent,
+
+    priority,
+
+    followup_type:
+      followupType,
+
+    next_followup_hours:
+      nextHours,
+
+    should_schedule_followup:
+      shouldSchedule,
+
+    reason:
+      'Auto generated from AI'
+  };
+}
+
+// ─────────────────────────────────────────────
+// 🔥 NEW: CREATE AI FOLLOWUP
+// ─────────────────────────────────────────────
+
+async function createAIFollowup({
+  agent_id,
+  phone,
+  ai
+}) {
+
+  try {
+
+    // GET LEAD
+
+    const leadRes =
+      await fetch(
+        `${SUPABASE_URL}/rest/v1/leads?phone=eq.${encodeURIComponent(phone)}&select=id&limit=1`,
+        {
+          headers: {
+            apikey: SUPABASE_KEY,
+            Authorization:
+              `Bearer ${SUPABASE_KEY}`
+          }
+        }
+      );
+
+    const leads =
+      await leadRes.json();
+
+    if (!leads?.length)
+      return;
+
+    const leadId =
+      leads[0].id;
+
+    // CHECK EXISTING FOLLOWUP
+
+    const existingRes =
+      await fetch(
+        `${SUPABASE_URL}/rest/v1/followups?lead_id=eq.${leadId}&status=eq.pending&limit=1`,
+        {
+          headers: {
+            apikey: SUPABASE_KEY,
+            Authorization:
+              `Bearer ${SUPABASE_KEY}`
+          }
+        }
+      );
+
+    const existing =
+      await existingRes.json();
+
+    if (existing?.length) {
+
+      console.log(
+        '⚠ Existing pending followup'
+      );
+
+      return;
+    }
+
+    // NEXT TIME
+
+    const next =
+      new Date();
+
+    next.setHours(
+      next.getHours() +
+      ai.next_followup_hours
+    );
+
+    // INSERT FOLLOWUP
+
+    await fetch(
+      `${SUPABASE_URL}/rest/v1/followups`,
+      {
+
+        method: 'POST',
+
+        headers: {
+
+          'Content-Type':
+            'application/json',
+
+          apikey:
+            SUPABASE_KEY,
+
+          Authorization:
+            `Bearer ${SUPABASE_KEY}`
+        },
+
+        body: JSON.stringify({
+
+          lead_id: leadId,
+
+          agent_id,
+
+          followup_date:
+            next.toISOString()
+              .split('T')[0],
+
+          followup_time:
+            next.toTimeString()
+              .slice(0,5),
+
+          followup_type:
+            ai.followup_type,
+
+          priority:
+            ai.priority,
+
+          ai_generated:
+            true,
+
+          ai_reason:
+            ai.reason,
+
+          status:
+            'pending'
+        })
+      }
+    );
+
+    console.log(
+      '✅ AI Followup Created'
+    );
+
+  } catch (err) {
+
+    console.error(
+      'Followup Create Error:',
+      err
+    );
+  }
+}
 // ── SAVE ──
 async function saveToSupabase(userMsg, aiReply, fromNumber, profileName, agentId) {
 
@@ -421,56 +675,4 @@ async function saveToSupabase(userMsg, aiReply, fromNumber, profileName, agentId
       ])
     });
   }
-  //chat route
-// api/webhook.js
-
-import { processAI } from "./ai.js";
-
-export default async function handler(req, res) {
-
-  try {
-
-    const body = req.body;
-
-    const userMessage =
-      body.message || '';
-
-    // AI PROCESSING
-    const aiResult =
-      await processAI(userMessage);
-
-    console.log(
-      "AI RESULT:",
-      aiResult
-    );
-
-    // ------------------------
-    // FUTURE AUTOMATION LOGIC
-    // ------------------------
-
-    // save conversation
-
-    // create followup
-
-    // notify agent
-
-    // trigger site visit
-
-    // etc...
-
-    return res.status(200).json({
-      success: true,
-      ai: aiResult
-    });
-
-  } catch (err) {
-
-    console.error(err);
-
-    return res.status(500).json({
-      error: err.message
-    });
-  }
-}
-}
-
+  
