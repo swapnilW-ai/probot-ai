@@ -1,6 +1,7 @@
 {
 "name":"propbot-ai",
 "version":"1.0.0",
+"description": "PropBot AI — AI Agent for Real Estate",
 "private":true,
 
 "scripts":{
