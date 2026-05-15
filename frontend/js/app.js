@@ -15,9 +15,6 @@ const routes = {
   billing: '/billing',
   settings: '/settings'
 };
-//backend rout
-const billingRoutes=require('./routes/billing');
-app.use('/api/billing',billingRoutes);
 
 // ── GLOBALS ───────
 window.currentAgent = null;
@@ -33,17 +30,14 @@ window.initApp = async function () {
 
     // No session
     if (!session) {
-
       window.location.href =
         "/frontend/pages/agent-portal.html";
-
       return;
     }
 
     const user = session.user;
 
     // Load agent profile
-
     const {
       data,
       error
@@ -54,7 +48,6 @@ window.initApp = async function () {
       .single();
 
     if (error) {
-
       console.error(
         'Agent fetch error:',
         error.message
@@ -63,13 +56,9 @@ window.initApp = async function () {
 
     window.currentAgent =
       data || {
-
         id: user.id,
-
         name: user.email,
-
         city: "Nashik",
-
         plan: "free"
       };
 
@@ -81,7 +70,6 @@ window.initApp = async function () {
     return window.currentAgent;
 
   } catch (err) {
-
     console.error(
       'initApp error:',
       err.message
