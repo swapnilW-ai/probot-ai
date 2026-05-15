@@ -1,7 +1,7 @@
 const express=require('express');
 const crypto=require('crypto');
 const router=express.Router();
-const razorpay=require('../services/razorpay');
+const razorpay=require('../api/services/razorpay');
 
 const PLAN_PRICES={
 starter:99900,
