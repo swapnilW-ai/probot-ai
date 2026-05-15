@@ -1,15 +1,19 @@
 {
-  "name": "propbot-ai",
-  "version": "1.0.0",
-  "description": "PropBot AI — WhatsApp AI Agent for Real Estate",
-  "private": true,
+"name":"propbot-ai",
+"version":"1.0.0",
+"description":"PropBot AI — Real Estate CRM",
+"private":true,
 
-  "scripts": {
-    "start": "node api/webhook.js",
-    "dev": "vercel dev"
-  },
+"scripts":{
+"start":"node backend/app.js",
+"dev":"vercel dev"
+},
 
-  "dependencies": {
-    "twilio": "^4.19.0"
-  }
+"dependencies":{
+"cors":"^2.8.5",
+"dotenv":"^16.4.5",
+"express":"^4.19.2",
+"razorpay":"^2.9.4",
+"twilio":"^4.19.0"
+}
 }
