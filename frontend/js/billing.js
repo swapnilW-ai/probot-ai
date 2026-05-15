@@ -1,4 +1,5 @@
-const agentId=localStorage.getItem('agent_id');
+let agentId=null;
+//const agentId=localStorage.getItem('agent_id');
 
 async function upgradePlan(plan){
 try{
@@ -118,4 +119,19 @@ console.error(err);
 
 }
 
-loadCurrentPlan();
+(async()=>{
+
+await window.initApp();
+
+agentId=window.currentAgent?.id;
+
+console.log('Agent ID:',agentId);
+
+if(!agentId){
+console.error('Agent ID missing');
+return;
+}
+
+await loadCurrentPlan();
+
+})();
