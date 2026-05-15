@@ -15,6 +15,9 @@ const routes = {
   billing: '/billing',
   settings: '/settings'
 };
+//backend rout
+const billingRoutes=require('./routes/billing');
+app.use('/api/billing',billingRoutes);
 
 // ── GLOBALS ───────
 window.currentAgent = null;
