@@ -1,12 +1,10 @@
 {
 "name":"propbot-ai",
 "version":"1.0.0",
-"description":"PropBot AI — Real Estate CRM",
 "private":true,
 
 "scripts":{
-"start":"node backend/app.js",
-"dev":"vercel dev"
+"start":"node backend/app.js"
 },
 
 "dependencies":{
