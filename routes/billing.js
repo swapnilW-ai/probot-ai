@@ -2,6 +2,12 @@ const express=require('express');
 const crypto=require('crypto');
 const router=express.Router();
 const razorpay=require('../api/services/razorpay');
+const {createClient}=require('@supabase/supabase-js');
+
+const supabase=createClient(
+process.env.SUPABASE_URL,
+process.env.SUPABASE_KEY
+);
 
 const PLAN_PRICES={
 starter:100,
@@ -65,7 +71,9 @@ try{
 const {
 razorpay_order_id,
 razorpay_payment_id,
-razorpay_signature
+razorpay_signature,
+plan,
+agent_id
 }=req.body;
 
 const generatedSignature=crypto
@@ -87,9 +95,45 @@ error:'Invalid signature'
 
 }
 
+const PLAN_PRICES={
+starter:999,
+growth:2999,
+pro:5999
+};
+
+const startDate=new Date();
+
+const endDate=new Date();
+
+endDate.setDate(endDate.getDate()+30);
+
+const {error}=await supabase
+.from('subscriptions')
+.insert([{
+agent_id,
+plan_name:plan,
+status:'active',
+amount:PLAN_PRICES[plan],
+start_date:startDate,
+end_date:endDate,
+razorpay_order_id,
+razorpay_payment_id
+}]);
+
+if(error){
+
+console.error(error);
+
+return res.status(500).json({
+success:false,
+error:'DB insert failed'
+});
+
+}
+
 res.json({
 success:true,
-message:'Payment verified'
+message:'Payment verified and subscription saved'
 });
 
 }catch(err){
@@ -107,14 +151,40 @@ error:'Verification failed'
 
 router.get('/current/:agentId',async(req,res)=>{
 
+try{
+
 const {agentId}=req.params;
 
-res.json({
-agentId,
-plan_name:'starter',
-status:'active',
-end_date:'2026-06-15'
+const {data,error}=await supabase
+.from('subscriptions')
+.select('*')
+.eq('agent_id',agentId)
+.eq('status','active')
+.order('created_at',{ascending:false})
+.limit(1)
+.single();
+
+if(error){
+
+return res.status(404).json({
+success:false,
+error:'No subscription found'
 });
+
+}
+
+res.json(data);
+
+}catch(err){
+
+console.error(err);
+
+res.status(500).json({
+success:false,
+error:'Failed to fetch subscription'
+});
+
+}
 
 });
 
