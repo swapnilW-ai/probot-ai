@@ -4,7 +4,7 @@ const router=express.Router();
 const razorpay=require('../api/services/razorpay');
 
 const PLAN_PRICES={
-starter:99900,
+starter:100,
 growth:299900,
 pro:599900
 };
