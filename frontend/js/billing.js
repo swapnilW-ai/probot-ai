@@ -3,7 +3,7 @@ let agentId=null;
 
 async function upgradePlan(plan){
 try{
-const res=await fetch('/api/billing/create-order',{
+const res=await fetch('https://probot-ai.onrender.com/api/billing/create-order',{
 method:'POST',
 headers:{
 'Content-Type':'application/json'
@@ -57,7 +57,7 @@ async function verifyPayment(paymentData,plan){
 
 try{
 
-const res=await fetch('/api/billing/verify',{
+const res=await fetch('https://probot-ai.onrender.com/api/billing/verify',{
 method:'POST',
 headers:{
 'Content-Type':'application/json'
@@ -97,7 +97,7 @@ async function loadCurrentPlan(){
 
 try{
 
-const res=await fetch(`/api/billing/current/${agentId}`);
+const res=await fetch(`https://probot-ai.onrender.com/api/billing/current/${agentId}`);
 
 const data=await res.json();
 
