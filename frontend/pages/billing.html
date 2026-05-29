@@ -4,11 +4,38 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Billing</title>
+<link rel="stylesheet" href="/frontend/styles/app.css"/>
 <link rel="stylesheet" href="/frontend/styles/billing.css">
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
 <body>
 
+<!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sb-logo"><div class="sb-dot"></div>PropBot AI</div>
+    <div class="sb-section">Main</div>
+    <div class="sb-item active" onclick="location.href='/portal'">⚡ Dashboard <span class="sb-badge" id="hot-badge">0</span></div>
+    <div class="sb-item">💬 Conversations</div>
+    <div class="sb-item">👥 All Leads</div>
+    <div class="sb-section">Manage</div>
+    <div class="sb-item" onclick="location.href='/properties'">🏠 My Properties</div>
+    <div class="sb-item" onclick="location.href='/visits'">📅 Site Visits</div>
+    <div class="sb-item" onclick="location.href='/followups'">🔁 Follow-ups</div>
+    <div class="sb-section">Account</div>
+    <div class="sb-item">⚙️ Settings</div>
+    <div class="sb-item" onclick="location.href='/billing'">💳 Billing</div>
+    <div class="sb-bottom">
+      <div class="sb-agent">
+        <div class="sb-avatar" id="sb-avatar">?</div>
+        <div>
+          <div class="sb-name" id="sb-name">Loading...</div>
+          <div class="sb-plan" id="sb-plan">PRO · Trial</div>
+        </div>
+      </div>
+      <button class="sb-logout" onclick="logout()">↩ Logout</button>
+    </div>
+  </div>
+  
 <div class="billing-container">
 
 <div class="top-bar">
