@@ -11,8 +11,8 @@ process.env.SUPABASE_SERVICE_ROLE_KEY
 
 const PLAN_PRICES={
 starter:100,
-growth:299900,
-pro:599900
+growth:100,
+pro:100
 };
 
 router.get('/test',(req,res)=>{
