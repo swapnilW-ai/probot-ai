@@ -12,7 +12,8 @@ body:JSON.stringify({plan})
 });
 
 const data=await res.json();
-
+// DEBUG ADDED
+console.log('Create Order Response:',data);
 if(!data.success){
 alert('Failed to create order');
 return;
@@ -56,7 +57,14 @@ alert('Something went wrong');
 async function verifyPayment(paymentData,plan){
 
 try{
-
+//debug
+console.log('Sending verify request:',{
+agent_id:agentId,
+plan,
+razorpay_order_id:paymentData.razorpay_order_id,
+razorpay_payment_id:paymentData.razorpay_payment_id,
+razorpay_signature:paymentData.razorpay_signature
+}); // DEBUG ADDED
 const res=await fetch('https://probot-ai.onrender.com/api/billing/verify',{
 method:'POST',
 headers:{
@@ -72,7 +80,8 @@ razorpay_signature:paymentData.razorpay_signature
 });
 
 const data=await res.json();
-
+// DEBUG ADDED
+console.log('Verify Response:',data);
 if(data.success){
 
 alert('Payment Successful');
