@@ -106,6 +106,14 @@ const startDate=new Date();
 const endDate=new Date();
 
 endDate.setDate(endDate.getDate()+30);
+// EXPIRE OLD ACTIVE SUBSCRIPTIONS
+await supabase
+.from('subscriptions')
+.update({
+status:'expired'
+})
+.eq('agent_id',agent_id)
+.eq('status','active');
 
 const {error}=await supabase
 .from('subscriptions')
