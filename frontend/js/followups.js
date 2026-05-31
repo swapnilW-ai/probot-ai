@@ -9,8 +9,8 @@ let currentTab   = 'today';
 let currentAISuggestion = null;
 let editingId    = null;
 
-//const GEMINI_KEY = 'AIzaSyBqdGK5fk9GGQKpcb2uInnWV1CvqUPi5nQ';
-//const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-8b:generateContent?key=' + GEMINI_KEY;
+const GEMINI_KEY = 'AIzaSyBqdGK5fk9GGQKpcb2uInnWV1CvqUPi5nQ';
+const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-8b:generateContent?key=' + GEMINI_KEY;
 const SUPABASE_URL = 'https://zejcequtmrmetogbxudz.supabase.co';
 //const SUPABASE_KEY = process.env.SUPABASE_KEY;
 
@@ -361,8 +361,8 @@ Recent conversation:
 ${convoText}`;
 
     // Call Gemini AI
-    //const res = await fetch(GEMINI_URL, {
-    const res = await fetch('backend/gemini', {
+    const res = await fetch(GEMINI_URL, {
+    //const res = await fetch('backend/gemini', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
