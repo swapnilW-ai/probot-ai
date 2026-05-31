@@ -1,0 +1,309 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Settings | PropBot AI</title>
+
+<link rel="stylesheet" href="settings.css">
+</head>
+<body>
+
+<div class="settings-page">
+
+    <!-- Header -->
+    <div class="page-header">
+        <div>
+            <h1>⚙️ Settings</h1>
+            <p>Manage account and application preferences</p>
+        </div>
+
+        <button class="save-all-btn" onclick="saveAllSettings()">
+            💾 Save All Changes
+        </button>
+    </div>
+
+    <!-- Layout -->
+    <div class="settings-layout">
+
+        <!-- Left Navigation -->
+        <div class="settings-nav">
+
+            <button class="nav-item active"
+                onclick="showSection('company', this)">
+                🏢 Company Profile
+            </button>
+
+            <button class="nav-item"
+                onclick="showSection('user', this)">
+                👤 User Profile
+            </button>
+
+            <button class="nav-item"
+                onclick="showSection('password', this)">
+                🔒 Change Password
+            </button>
+
+            <button class="nav-item"
+                onclick="showSection('calculator', this)">
+                🧮 Property Calculator
+            </button>
+
+            <button class="nav-item"
+                onclick="showSection('notification', this)">
+                🔔 Notifications
+            </button>
+
+        </div>
+
+        <!-- Content -->
+        <div class="settings-content">
+
+            <!-- COMPANY PROFILE -->
+            <div class="settings-card section active" id="company">
+
+                <div class="card-header">
+                    <h2>Company Profile</h2>
+                    <p>Business details used in reports and invoices</p>
+                </div>
+
+                <div class="logo-upload">
+
+                    <div class="logo-preview" id="company-logo-preview">
+                        🏢
+                    </div>
+
+                    <input
+                        type="file"
+                        id="company-logo"
+                        accept="image/*">
+
+                </div>
+
+                <div class="form-grid">
+
+                    <div class="form-group">
+                        <label>Company Name</label>
+                        <input
+                            type="text"
+                            id="company-name">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Owner Name</label>
+                        <input
+                            type="text"
+                            id="owner-name">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input
+                            type="email"
+                            id="company-email">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Mobile</label>
+                        <input
+                            type="text"
+                            id="company-mobile">
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label>Office Address</label>
+                        <textarea
+                            id="company-address"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>GST Number</label>
+                        <input
+                            type="text"
+                            id="gst-number">
+                    </div>
+
+                    <div class="form-group">
+                        <label>RERA Number</label>
+                        <input
+                            type="text"
+                            id="rera-number">
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- USER PROFILE -->
+            <div class="settings-card section" id="user">
+
+                <div class="card-header">
+                    <h2>User Profile</h2>
+                    <p>Manage your account information</p>
+                </div>
+
+                <div class="profile-upload">
+
+                    <div class="profile-preview"
+                         id="profile-preview">
+                        SW
+                    </div>
+
+                    <input
+                        type="file"
+                        id="profile-picture"
+                        accept="image/*">
+
+                </div>
+
+                <div class="form-grid">
+
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="user-name">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="user-email">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Mobile</label>
+                        <input type="text" id="user-mobile">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Designation</label>
+                        <input type="text" id="designation">
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- CHANGE PASSWORD -->
+            <div class="settings-card section" id="password">
+
+                <div class="card-header">
+                    <h2>Change Password</h2>
+                </div>
+
+                <div class="form-grid">
+
+                    <div class="form-group">
+                        <label>Current Password</label>
+                        <input type="password"
+                               id="current-password">
+                    </div>
+
+                    <div class="form-group">
+                        <label>New Password</label>
+                        <input type="password"
+                               id="new-password">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Confirm Password</label>
+                        <input type="password"
+                               id="confirm-password">
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- PROPERTY CALCULATOR -->
+            <div class="settings-card section"
+                 id="calculator">
+
+                <div class="card-header">
+                    <h2>Property Calculator Settings</h2>
+                </div>
+
+                <div class="form-grid">
+
+                    <div class="form-group">
+                        <label>GST %</label>
+                        <input type="number"
+                               id="gst-percent">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Stamp Duty %</label>
+                        <input type="number"
+                               id="stamp-duty">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Registration %</label>
+                        <input type="number"
+                               id="registration">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Brokerage %</label>
+                        <input type="number"
+                               id="brokerage">
+                    </div>
+
+                    <div class="form-group">
+                        <label>TDS %</label>
+                        <input type="number"
+                               id="tds">
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- NOTIFICATIONS -->
+            <div class="settings-card section"
+                 id="notification">
+
+                <div class="card-header">
+                    <h2>Notification Settings</h2>
+                </div>
+
+                <div class="toggle-list">
+
+                    <label class="toggle-row">
+                        <span>Email Notifications</span>
+                        <input type="checkbox"
+                               id="email-notification">
+                    </label>
+
+                    <label class="toggle-row">
+                        <span>WhatsApp Notifications</span>
+                        <input type="checkbox"
+                               id="whatsapp-notification">
+                    </label>
+
+                    <label class="toggle-row">
+                        <span>Lead Alerts</span>
+                        <input type="checkbox"
+                               id="lead-alerts">
+                    </label>
+
+                    <label class="toggle-row">
+                        <span>System Updates</span>
+                        <input type="checkbox"
+                               id="system-updates">
+                    </label>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script src="settings.js"></script>
+
+</body>
+</html>
+```
