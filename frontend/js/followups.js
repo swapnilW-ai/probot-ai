@@ -12,7 +12,7 @@ let editingId    = null;
 const GEMINI_KEY = 'AIzaSyBqdGK5fk9GGQKpcb2uInnWV1CvqUPi5nQ';
 const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-8b:generateContent?key=' + GEMINI_KEY;
 const SUPABASE_URL = 'https://zejcequtmrmetogbxudz.supabase.co';
-const SUPABASE_KEY = process.env.SUPABASE_KEY;;
+const SUPABASE_KEY = process.env.SUPABASE_KEY;
 
 // ── INIT ──────────────────────────────────────────────
 initApp().then(async () => {
