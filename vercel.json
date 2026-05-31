@@ -14,6 +14,6 @@
     { "src": "^/visits$", "dest": "/frontend/pages/visits.html" },
     { "src": "^/followups$", "dest": "/frontend/pages/followups.html" },
     { "src": "^/billing$", "dest": "/frontend/pages/billing.html" },
-    { "src": "^/billing$", "dest": "/frontend/pages/settings.html" }
+    { "src": "^/settings$", "dest": "/frontend/pages/settings.html" }
   ]
 }
