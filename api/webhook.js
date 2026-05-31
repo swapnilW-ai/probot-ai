@@ -399,7 +399,8 @@ async function getGeminiReply(systemPrompt, history) {
     ...history
   ];
 
-  const response = await fetch(GEMINI_URL, {
+  //const response = await fetch(GEMINI_URL, {
+  const response = await fetch('backend/gemini', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ contents })
