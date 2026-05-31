@@ -362,7 +362,7 @@ ${convoText}`;
 
     // Call Gemini AI
     //const res = await fetch(GEMINI_URL, {
-    const res = await fetch(backend/gemini, {
+    const res = await fetch('backend/gemini', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
