@@ -675,4 +675,4 @@ async function saveToSupabase(userMsg, aiReply, fromNumber, profileName, agentId
       ])
     });
   }
-  
+  } 
