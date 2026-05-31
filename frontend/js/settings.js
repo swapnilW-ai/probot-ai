@@ -1,4 +1,3 @@
-```javascript
 // ==========================
 // SETTINGS PAGE
 // ==========================
@@ -178,4 +177,3 @@ async function saveAllSettings(){
 
     }
 }
-```
