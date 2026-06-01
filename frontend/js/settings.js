@@ -11,6 +11,36 @@ document.addEventListener('DOMContentLoaded', async () => {
     await loadSettings();
 });
 
+
+// HOME
+
+function goHome() {
+    window.location.href = '/portal';
+}
+
+// LOGOUT
+
+async function logout() {
+
+    try {
+
+        if (window.db?.auth) {
+            await window.db.auth.signOut();
+        }
+
+        localStorage.clear();
+        sessionStorage.clear();
+
+        window.location.href = '/';
+
+    } catch (err) {
+        console.error(err);
+        alert('Logout failed');
+    }
+}
+
+
+
 // SECTION SWITCH
 
 function showSection(section, btn){
