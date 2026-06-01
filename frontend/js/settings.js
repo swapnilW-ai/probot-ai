@@ -2,7 +2,8 @@
 // SETTINGS PAGE
 // ==========================
 
-const db = window.db;
+const db = window.db || window.supabaseClient; console.log('db =', db); 
+console.log('currentAgent =', window.currentAgent);
 
 let currentSection = 'company';
 
