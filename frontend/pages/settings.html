@@ -28,12 +28,7 @@
     <div class="settings-layout">
 
         <!-- Left Navigation -->
-        <div class="settings-nav">
-            <button class="nav-item active"
-                onclick="showSection('/portal', this)">
-                🏠 Home
-            </button>
-            
+                   
             <button class="nav-item active"
                 onclick="showSection('company', this)">
                 🏢 Company Profile
@@ -58,6 +53,8 @@
                 onclick="showSection('notification', this)">
                 🔔 Notifications
             </button>
+            <hr style="margin:20px 0;"> <button class="nav-item home-btn" onclick="goHome()"> 🏠 Home </button>
+            <button class="nav-item logout-btn" onclick="logout()"> 🚪 Logout </button>
 
         </div>
 
