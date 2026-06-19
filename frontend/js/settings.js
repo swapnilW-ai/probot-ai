@@ -1,6 +1,8 @@
 // ==========================
 // SETTINGS PAGE
 // ==========================
+console.log("window.db =", window.db);
+console.log("window.currentAgent =", window.currentAgent);
 
 const db = window.db || window.supabaseClient; console.log('db =', db); 
 console.log('currentAgent =', window.currentAgent);
