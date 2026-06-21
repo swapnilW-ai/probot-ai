@@ -1,18 +1,43 @@
 // ==========================
 // SETTINGS PAGE
 // ==========================
-console.log("window.db =", window.db);
-console.log("window.currentAgent =", window.currentAgent);
+// db and currentAgent are initialized by app.js 
 
-const db = window.db || window.supabaseClient; console.log('db =', db); 
-console.log('currentAgent =', window.currentAgent);
+function getDB() { 
+	return window.db;
+ }
+function getAgent() {
+	return window.currentAgent; 
+}
 
 let currentSection = 'company';
 
 // INIT
+// WAIT FOR APP.JS INITIALIZATION
+
 document.addEventListener('DOMContentLoaded', async () => {
+
+    // ===== DEBUG =====
+    console.log('Waiting for app initialization...');
+
+    let retries = 0;
+
+    while ((!window.db || !window.currentAgent) && retries < 50) {
+        await new Promise(r => setTimeout(r, 100));
+        retries++;
+    }
+
+    console.log('window.db =', window.db);
+    console.log('window.currentAgent =', window.currentAgent);
+
+    if (!window.db || !window.currentAgent) {
+        console.error('App initialization failed');
+        return;
+    }
+
     await loadSettings();
 });
+
 
 
 // HOME
@@ -71,10 +96,11 @@ async function loadSettings(){
 
     try{
 
-        const { data } = await db
+        const { data } = await getDB()
             .from('settings')
             .select('*')
-            .eq('agent_id', currentAgent.id)
+            //.eq('agent_id', currentAgent.id)
+            .eq('agent_id', getAgent().id)
             .single();
 
         if(!data) return;
@@ -141,7 +167,7 @@ async function saveAllSettings(){
 
         const payload = {
 
-            agent_id: currentAgent.id,
+            agent_id: getAgent().id,
 
             company_name:
                 document.getElementById('company-name').value,
@@ -195,7 +221,8 @@ async function saveAllSettings(){
                 new Date().toISOString()
         };
 
-        const { error } = await db
+        //const { error } = await db
+        const { error } = await getDB()
             .from('settings')
             .upsert(payload);
 
