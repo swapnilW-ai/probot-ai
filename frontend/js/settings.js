@@ -226,9 +226,7 @@ async function saveAllSettings(){
 
             owner_name:
                 document.getElementById('owner-name').value,
-			if(profilePictureUrl){
-    			payload.profile_picture_url = profilePictureUrl;
-			}
+			
 			email:
                 document.getElementById('company-email').value,
 
