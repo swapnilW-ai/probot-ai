@@ -108,6 +108,41 @@ async function loadSettings(){
             .maybeSingle();
 
         if(!data) return;
+		
+// LOAD PROFILE PICTURE
+
+		console.log('Profile URL:', data.profile_picture_url);
+
+		if(data.profile_picture_url){
+
+    		document.getElementById('profile-preview').innerHTML = `
+        		<img
+            		src="${data.profile_picture_url}"
+            		style="
+                		width:100%;
+                		height:100%;
+                		object-fit:cover;
+                		border-radius:50%;
+            		"
+        		/>
+   		 `;
+		}
+		else{
+
+   		 const name =
+       		 getAgent().name || 'User';
+
+    		const initials =
+       		 name
+        		.split(' ')
+        		.map(word => word[0])
+        		.join('')
+        		.substring(0,2)
+        		.toUpperCase();
+
+    		document.getElementById('profile-preview')
+       		 .textContent = initials;
+		}
 
         document.getElementById('company-name').value =
             data.company_name || '';
