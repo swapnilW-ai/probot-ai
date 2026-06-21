@@ -157,6 +157,24 @@
     font-weight:700;
 }
 
+.upload-section input[type="file"]{
+    padding:10px;
+    border:1px solid #d1d5db;
+    border-radius:10px;
+    background:#fff;
+    cursor:pointer;
+}
+
+.upload-section input[type="file"]:hover{
+    border-color:#2563eb;
+}
+
+.upload-hint{
+    color:#6b7280;
+    font-size:12px;
+}
+
+
 /* FORM */
 
 .form-grid{
