@@ -127,6 +127,24 @@ async function loadSettings(){
         		/>
    		 `;
 		}
+
+		// LOAD COMPANY LOGO
+
+		if(data.company_logo_url){
+
+    		document.getElementById('company-logo-preview').innerHTML = `
+        		<img
+            		src="${data.company_logo_url}"
+            		style="
+                		width:100%;
+                		height:100%;
+                		object-fit:cover;
+                		border-radius:12px;
+            		"
+        		/>
+    		`;
+		}
+			
 		else{
 
    		 const name =
