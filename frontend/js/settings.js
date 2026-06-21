@@ -17,25 +17,29 @@ let currentSection = 'company';
 
 document.addEventListener('DOMContentLoaded', async () => {
 
-    // ===== DEBUG =====
-    console.log('Waiting for app initialization...');
+    try {
 
-    let retries = 0;
+        // SAME PATTERN AS FOLLOWUPS PAGE
 
-    while ((!window.db || !window.currentAgent) && retries < 50) {
-        await new Promise(r => setTimeout(r, 100));
-        retries++;
+        await initApp();
+
+        console.log('db:', window.db);
+        console.log('agent:', window.currentAgent);
+
+        if (!window.currentAgent) {
+            alert('Please login again');
+            window.location.href = '/';
+            return;
+        }
+
+        await loadSettings();
+
+    } catch (err) {
+
+        console.error('Init Error:', err);
+
     }
 
-    console.log('window.db =', window.db);
-    console.log('window.currentAgent =', window.currentAgent);
-
-    if (!window.db || !window.currentAgent) {
-        console.error('App initialization failed');
-        return;
-    }
-
-    await loadSettings();
 });
 
 
