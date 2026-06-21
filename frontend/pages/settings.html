@@ -28,7 +28,7 @@
     <div class="settings-layout">
 
         <!-- Left Navigation -->
-                   
+        <div class="settings-nav">           
             <button class="nav-item active"
                 onclick="showSection('company', this)">
                 🏢 Company Profile
@@ -144,19 +144,28 @@
                     <p>Manage your account information</p>
                 </div>
 
+                
                 <div class="profile-upload">
 
-                    <div class="profile-preview"
-                         id="profile-preview">
+                    <div class="profile-preview" id="profile-preview">
                         SW
-                    </div>
+                </div>
+
+                <div class="upload-section">
 
                     <input
                         type="file"
                         id="profile-picture"
                         accept="image/*">
 
+                    <small class="upload-hint">
+                        Upload JPG, PNG or WEBP (Max 5MB)
+                    </small>
+
                 </div>
+
+            </div>
+
 
                 <div class="form-grid">
 
