@@ -1,5 +1,5 @@
 // ==========================
-// SETTINGS PAGE
+// SETTINGS PAGE.
 // ==========================
 // db and currentAgent are initialized by app.js 
 
