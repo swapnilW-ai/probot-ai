@@ -163,11 +163,76 @@ async function loadSettings(){
     }
 }
 
+//Create upload function
+
+async function uploadProfilePicture() {
+
+    const file =
+        document.getElementById('profile-picture')
+        .files[0];
+
+    if (!file) return null;
+
+    const agentId = getAgent().id;
+
+    // GET CURRENT IMAGE URL
+
+    const { data: current } = await getDB()
+        .from('settings')
+        .select('profile_picture_url')
+        .eq('agent_id', agentId)
+        .maybeSingle();
+
+    // DELETE OLD IMAGE
+
+    if (current?.profile_picture_url) {
+
+        const oldPath =
+            current.profile_picture_url
+            .split('/profile-pictures/')[1];
+
+        if (oldPath) {
+
+            await getDB()
+                .storage
+                .from('profile-pictures')
+                .remove([oldPath]);
+
+        }
+    }
+
+    // UPLOAD NEW IMAGE
+
+    const fileName =
+        `${agentId}-${Date.now()}.${file.name.split('.').pop()}`;
+
+    const { error } = await getDB()
+        .storage
+        .from('profile-pictures')
+        .upload(fileName, file);
+
+    if (error) throw error;
+
+    const { data } = getDB()
+        .storage
+        .from('profile-pictures')
+        .getPublicUrl(fileName);
+
+    return data.publicUrl;
+}
+
+
 // SAVE
 
 async function saveAllSettings(){
 
     try{
+		let profilePictureUrl = null; 
+		if ( document.getElementById('profile-picture') 
+     		.files.length > 0
+ 		)
+ 		{ profilePictureUrl = 
+			await uploadProfilePicture(); }
 
         const payload = {
 
@@ -178,8 +243,9 @@ async function saveAllSettings(){
 
             owner_name:
                 document.getElementById('owner-name').value,
-
-            email:
+			profile_picture_url:
+    			profilePictureUrl || existingUrl,
+			email:
                 document.getElementById('company-email').value,
 
             mobile:
@@ -224,11 +290,15 @@ async function saveAllSettings(){
             updated_at:
                 new Date().toISOString()
         };
+		if(profilePictureUrl){
+    	payload.profile_picture_url = profilePictureUrl;
+		}
 
         //const { error } = await db
         const { error } = await getDB()
             .from('settings')
-            .upsert(payload);
+            .upsert(payload)
+			onConflict: 'agent_id';
 
         if(error) throw error;
 
