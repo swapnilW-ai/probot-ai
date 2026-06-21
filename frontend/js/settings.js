@@ -105,7 +105,7 @@ async function loadSettings(){
             .select('*')
             //.eq('agent_id', currentAgent.id)
             .eq('agent_id', getAgent().id)
-            .single();
+            .maybeSingle();
 
         if(!data) return;
 
