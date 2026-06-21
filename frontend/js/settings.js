@@ -216,7 +216,7 @@ async function loadSettings(){
     }
 }
 
-//Create upload function
+//upload function Profile picture
 
 async function uploadProfilePicture() {
 
@@ -256,19 +256,57 @@ async function uploadProfilePicture() {
 
     return data.publicUrl;
 }
+//upload function Company logo
+async function uploadCompanyLogo(){
 
+    const file =
+        document.getElementById('company-logo')
+        .files[0];
+
+    if(!file) return null;
+
+    const fileName =
+        `${getAgent().id}.jpg`;
+
+    const { error } = await getDB()
+        .storage
+        .from('company-logos')
+        .upload(fileName, file, {
+            upsert:true
+        });
+
+    if(error) throw error;
+
+    const { data } = getDB()
+        .storage
+        .from('company-logos')
+        .getPublicUrl(fileName);
+
+    return data.publicUrl;
+}
 
 // SAVE
 
 async function saveAllSettings(){
 
     try{
+		//Profile picture
 		let profilePictureUrl = null; 
 		if ( document.getElementById('profile-picture') 
      		.files.length > 0
  		)
  		{ profilePictureUrl = 
 			await uploadProfilePicture(); }
+		//Company Logo
+		let companyLogoUrl = null;
+
+		if (
+    		document.getElementById('company-logo')
+    		.files.length > 0
+		){
+    		companyLogoUrl =
+       		 await uploadCompanyLogo();
+		}
 
         const payload = {
 
@@ -325,10 +363,16 @@ async function saveAllSettings(){
             updated_at:
                 new Date().toISOString()
         };
+		
+		//profile picture payload creation
 		if(profilePictureUrl){
     	payload.profile_picture_url = profilePictureUrl;
 		}
 
+		// company logo payload creation 
+		if(companyLogoUrl){
+   		 payload.company_logo_url = companyLogoUrl;
+	}	
         //const { error } = await db
         const { error } = await getDB()
     .		from('settings')
