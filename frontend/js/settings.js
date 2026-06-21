@@ -183,33 +183,16 @@ async function uploadProfilePicture() {
         .eq('agent_id', agentId)
         .maybeSingle();
 
-    // DELETE OLD IMAGE
-
-    if (current?.profile_picture_url) {
-
-        const oldPath =
-            current.profile_picture_url
-            .split('/profile-pictures/')[1];
-
-        if (oldPath) {
-
-            await getDB()
-                .storage
-                .from('profile-pictures')
-                .remove([oldPath]);
-
-        }
-    }
 
     // UPLOAD NEW IMAGE
+		const fileName = `${agentId}.jpg`;
 
-    const fileName =
-        `${agentId}-${Date.now()}.${file.name.split('.').pop()}`;
-
-    const { error } = await getDB()
-        .storage
-        .from('profile-pictures')
-        .upload(fileName, file);
+		const { error } = await getDB()
+    		.storage
+    		.from('profile-pictures')
+    		.upload(fileName, file, {
+        		upsert: true
+    });
 
     if (error) throw error;
 
