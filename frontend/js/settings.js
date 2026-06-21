@@ -226,8 +226,9 @@ async function saveAllSettings(){
 
             owner_name:
                 document.getElementById('owner-name').value,
-			profile_picture_url:
-    			profilePictureUrl || existingUrl,
+			if(profilePictureUrl){
+    			payload.profile_picture_url = profilePictureUrl;
+			}
 			email:
                 document.getElementById('company-email').value,
 
@@ -279,9 +280,10 @@ async function saveAllSettings(){
 
         //const { error } = await db
         const { error } = await getDB()
-            .from('settings')
-            .upsert(payload)
-			onConflict: 'agent_id';
+    .		from('settings')
+    		.upsert(payload, {
+        	onConflict: 'agent_id'
+    });
 
         if(error) throw error;
 
